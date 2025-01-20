@@ -13,7 +13,7 @@
 /out/
 
 # next-image-export-optimizer
-/public/images/nextImageExportOptimizer
+public/images/**/nextImageExportOptimizer
 /public/images/next-image-export-optimizer-hashes.json
 
 # production
