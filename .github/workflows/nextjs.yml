@@ -65,10 +65,8 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      - name: Install next-image-export-optimizer
-        run: ${{ steps.detect-package-manager.outputs.manager }} install next-image-export-optimizer
       - name: Build with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build && next-image-export-optimizer
+        run: ${{ steps.detect-package-manager.outputs.runner }} dev build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
