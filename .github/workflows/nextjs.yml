@@ -67,6 +67,8 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Install linux-x64 tailwind
         run: ${{ steps.detect-package-manager.outputs.manager }} install @tailwindcss/oxide-linux-x64-gnu
+      - name: Install linux-x64 lightningcss
+        run: ${{ steps.detect-package-manager.outputs.manager }} install @lightningcss/oxide-linux-x64-gnu
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} run build
       - name: Upload artifact
