@@ -1,12 +1,10 @@
 import Link from 'next/link'
-import Image from 'next/image';
 import ExportedImage from "next-image-export-optimizer";
 import { MDXRemote } from "next-mdx-remote-client/rsc";
 import type { MDXRemoteOptions } from "next-mdx-remote-client/rsc";
 import remarkGfm from 'remark-gfm'
 import { highlight } from 'sugar-high'
 import React from 'react'
-
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -46,10 +44,6 @@ function CustomLink(props) {
   }
 
   return <a target="_blank" rel="noopener noreferrer" {...props} />
-}
-
-function Gif(props) {
-  return <ExportedImage alt={props.alt} className="rounded-lg" {...props} />
 }
 
 function RoundedImage(props) {
@@ -110,7 +104,6 @@ let components = {
   a: CustomLink,
   code: Code,
   Table,
-  Gif,
 }
 
 const options: MDXRemoteOptions = {
