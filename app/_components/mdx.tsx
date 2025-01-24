@@ -46,18 +46,22 @@ function CustomLink(props) {
   return <a target="_blank" rel="noopener noreferrer" {...props} />
 }
 
-function RoundedImage(props) {
+function Figure(props) {
   return ( 
-    <figure className="flex flex-col items-center">
-      <ExportedImage 
-        alt={props.alt} 
-        className="rounded-lg relative" 
-        width={1000}
-        height={1000}
-        {...props} />
-      <figcaption className="mt-2">{props.alt}</figcaption>
-      </figure>
+    <figure className="flex flex-col items-center my-4">
+      <RoundedImage src={props.src} alt={props.caption} />
+      <figcaption className="mt-2">{props.caption}</figcaption>
+    </figure>
   )
+}
+
+function RoundedImage(props) {
+  return <ExportedImage 
+            src = {props.src}
+            alt={props.alt} 
+            className="rounded-lg relative" 
+            width={1000}
+            height={1000} />
 }
 
 function Code({ children, ...props }) {
@@ -109,13 +113,14 @@ let components = {
   a: CustomLink,
   code: Code,
   Table,
+  Figure,
 }
 
 const options: MDXRemoteOptions = {
   mdxOptions: {
     remarkPlugins: [
       remarkGfm,
-    ], 
+    ],
   },
   parseFrontmatter: true,
 };
