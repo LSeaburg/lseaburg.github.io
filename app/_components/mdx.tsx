@@ -47,12 +47,17 @@ function CustomLink(props) {
 }
 
 function RoundedImage(props) {
-  return <ExportedImage 
-            alt={props.alt} 
-            className="rounded-lg relative" 
-            width={1000}
-            height={1000}
-            {...props} />
+  return ( 
+    <figure className="flex flex-col items-center">
+      <ExportedImage 
+        alt={props.alt} 
+        className="rounded-lg relative" 
+        width={1000}
+        height={1000}
+        {...props} />
+      <figcaption className="mt-2">{props.alt}</figcaption>
+      </figure>
+  )
 }
 
 function Code({ children, ...props }) {
