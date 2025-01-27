@@ -1,0 +1,99 @@
+---
+title: 'How I Built This Site'
+publishedAt: '2025-01-26'
+summary: 'Part 1 of the site, anyway'
+---
+## Background
+
+I have a history in web development.  Back in high school at my first job, XLR8 Development, I led the development of our in-house time-keeping app, [XLR8 Time](https://time.xlr8dev.com/index.html).  I'm proud that they still use it, and in hindsight I'm impressed that I was able to create a full website at the time.  I handled all of the structural design, database design, and most of the core site, but got help from some of my coworkers here and there and delegated the payment processing (api keys scared me).
+
+The summer before college I got a small gig updating the website of a law firm that a family friend worked at.  In my freshman year at college I made [this temporary landing page](https://github.com/innovate-blockchain/innovate-blockchain.github.io/tree/design) for a club I was heavily involved in at the time.  I think it looks alright, if a little dated (though it never got used).[^1]  Later, in my junior year, I worked with a professor at ASU to improve and add new features to [Circuit Tutor](https://www.circuittutor.com/web/home), doing a lot of front-end bug fixes and reworking some back-end logic.
+
+<Figure src = "images/blog/building-this-site-part-1/bis_home.png"
+        caption="The top of the BIS homepage"
+/>
+
+But even after all of this, I still felt like I wasn't a 'real' web developer.  "Why?" you may ask.  "Well", I'd respond, "because I wrote those in raw HTML/CSS/Javascript".  
+
+And there is some truth to this.  I made a nice-looking cost-saving website for XLR8, but I left them with a nightmare of maintainability.  The site was fully functional, but there's a lot of things I would do differently if I were to start over again now, 8 years later.
+
+Plus I've always felt a stigma when it comes to web development and frameworks.  The law firm told me they were scoffed at when they had previously asked a 'real' web developer to update some pictures on there site.  He said the site was impossible to understand without a framework.  And I was scoffed at by another member in the club when I created my landing page in html and Bootstrap.[^2]
+
+Circuit Tutor was built on one of the older, less-flashy frameworks, and on that job most of my time was making bug-fixes and refactoring, and I was only able to spend a fraction of my time on new development.  I was still left with a craving to do more.
+
+## I am become React, destroyer of raw HTML
+
+Naturally, then, 4.5 years ago when I first wanted to make my website, I knew I needed to use a framework.  I wanted to learn React, and went with Gatsby.  I worked on it a few weeks, but never made a single page.  I think the problem was I didn't have much need for a website.  I didn't write, or have much to share.
+
+The past few years, however, I've started to have the craving again.  Spending more time on HackerNews has shown me the communal value of having a place to share your thoughts.  And I've started writing more and taking photography a little more seriously; I feel like I have things to share.
+
+So late last year I started again.  Taking a new look at frameworks, I decided to use Next.js.  While I knew I wanted a static site, I felt that using static exports with Next.js would give me a similar experience to using Gatsby, and that learning something more flexible and more powerful would be good for potential projects in the future.  
+
+I wanted something by the new year, but the Advent of Code got in the way.  While my eventual goal is still to have a cool landing page, a blogging section, a movie review section, and an image gallery, seeing January ticking by forced me to consider what my minimum viable product looked like.
+
+In order to feel that phase one of my site was complete, I wanted to have a simple blog with the following:
+
+- Auto-generated article list page
+- MDX article renderer (to support any custom elements)
+- GFM (GitHub Flavored Markdown) support
+- KaTeX support
+- Frontmatter support (to facilitate generation of article list)
+- Image Optimization
+- One-click deployments
+- Clean code - I wanted to learn the 'best-practices'
+
+The one thing I didn't really care about was SEO and metadata.  I figure that I probably won't compete with the big sites and any traffic will likely be driven by word-of-mouth or cross-posting on social media, eg. HackerNews, LinkedIn, Medium, Reddit, etc.
+
+
+## The Development
+### Or: A needlessly thourough account of the issues I ran into
+
+> **Note:** If you want to see any of the code you can view it on GitHub, and if you want to use this site as a template for your own site, feel free!  This section is more to enumerate some of the challenges that I faced when building this, rather than to explain how the page-building pipeline works.
+
+I read the Next.js docs to understand the folder structure and routing.  I created a clean project and started creating some structure.  I was disappointed to learn that `next\Image` does not support image optimization with static builds, but I quickly found `next-image-export-optimizer`.  
+
+I found [this template](https://vercel.com/templates/next.js/blog-starter-kit) to base my blog off of.  I really liked the organization.  The problem, however, was that it used Markdown, not MDX.  I didn't have my above list of requirements in the beginning.  But I would have saved a lot of time had I cemented my requirements early and spent more time on finding an existing template that had met more of my requirements.
+
+After spending a week or so learning about the structure of React apps, copying things from the template into my new project, and modifying the code so it better fit my needs I decided to try to change the Markdown renderer to an MDX renderer.  I added `@next/mdx` and got to work.
+
+After a few hours I got it working.  With `npm run dev` my site was up and my React components were being rendered.  However, I then did a `npm run build` and... nothing.  Not even an error message.  Just nothing, no files created.
+
+After many hours of debugging I stumbled across [this thread](https://github.com/vercel/next.js/issues/60030), a GitHub Issues post about my exact issue.  It has detailed steps to reproduce, and has been open for over a year.  But it didn't seem there was a workaround.  Back to square one.
+
+Luckily, though, it seemed like it might have been an easy fix.  `next-mdx-remote` was pretty popular and seemed like a good replacement.  Unfortunately, however, after spending several hours implementing, and then debugging this solution, I ran into a similar issue.  `npm run dev` would deploy just fine, but `npm run build` would error out.  This time, though, I would get an error message about `useState` and client contexts.[^3]
+
+I was getting extremely discouraged.  After another week of working on my site there was nothing to show for it.  I was beginning to lose faith in Next.js's static exports and how well they were supported - it's certainly not their core product, after all.  So I decided to move back to Gatsby.
+
+This didn't last long, however.  Their MDX resources seemed even more limited, and after spending so much time with it I had grown very fond of the Next.js `app` router - I didn't want to learn another routing paradigm at this point unless I had no other option.
+
+After taking another look at the Next.js example templates I found [this one](https://vercel.com/templates/next.js/portfolio-starter-kit) that generated from MDX files.  I tried creating a static export and it didn't work out-of-the-box.  But it was a simple fix, I just needed to remove some parts that were dynamic and create `next.config.js` with an `output: "export"` option.
+
+I added `next-image-export-optimizer`, restructed some parts of the code and I finally had static exports of pages sourced from MDX files!  I added the auto-generated GitHub runner to deploy the site and that didn't work out-of-the-box either, but it was nothing I couldn't fix.
+
+There were a few problems, though.  My Markdown rendering didn't support GFM, and my MDX files didn't seem to work with any React elements (negating the entire point of MDX).  I could not get this to work for the life of me.  However, I finally found [this library](https://github.com/ipikuka/next-mdx-remote-client), `next-mdx-remote-client`, a fork of `next-mdx-remote`.  And after updating my version of React to use it, I found it was incredible.
+
+It seems individually maintained and on GitHub it has ~60 stars (compared to `next-mdx-remote`'s 2.8k.  After importing you can exchange it directly for `next-mdx-remote`, but it is so much easier to extend, and, specifically, add remark plugins to.  It really should be more popular than it is.  Thanks to `next-mdx-remote-client` I was finally able to get GFM and images working inside of MDX files!
+
+The only problem with it, though, is that it seemed to introduce another somewhat obscure error with my GitHub build pipeline based around architecture specific npm packages and documented [here](https://github.com/npm/cli/issues/4828).  Building statically on my M1 Mac was fine, but when building on the runner it complained of missing x86-specific dependencies.  But I found a hack-y solution.
+
+There's more I'd like to add to the site, but I'm incredibly happy with where I got.  It feels amazing to add an `mdx` file, push to main, and then see the changes immeadately take effect on my own domain!
+
+## Takeaways
+
+Even though it might not seem like much to an outsider, getting this site to where it is now was a lot harder and took a lot more time than I thought.  I'm surprised that I couldn't find a template that was more specially suited to my purposes.  I'm not sure if this was because it is hard to sort through all of the existing templates out there, or if it is because one doesn't exist.
+
+On a similar note, I'm glad that I was able to find `next-mdx-remote-client`, as it seems to work extremely well for my purposes.  But that likewise was hard to find.  I suppose that it the nature of open source, both its beauty and its frusturation - anyone can make anything extremely useful, but knowing about and finding those useful things can be extremely hard.  Additionally, you can't tell the quality of the product until you've already invested a lot of time into testing it (or if you can trust some good reviews) - but I suppose that is an issue with closed-source software too.
+
+I think this is why I find web development frusturating - the technologies are so complex that you tend to rely on many different frameworks, but then it feels like a large portion of the time is trying to fix dependencies and build pipelines.  Now that things are setup and working I hope they continue to play nice, but I am already dreading some support for one of the dependencies being dropped and having to deal with a bunch of breaking changes.
+
+My use of ChatGPT might have actually contributed a little to my frusturation as well - it is an excellent tool as a Google replacement, but it can be unwise to ever put too much stock in anything that it tells you.  I think that, at times, ChatGPT actually led me down the wrong path and made some things take longer to solve than they otherwise would have.
+
+I'm simultanously amazed, glad, and proud that I have a system where I can put a markdown file in a folder on my own computer and, in one click, have a new article on my own domain.  I find that so incredbile when I stop and think about that, and how many different systems are interacting with each other all the way up.  But I do miss those days when I would spin up sites with raw HTML and CSS.  Sometimes there really is beauty in simplicity.
+
+I do plan do build out the site more eventually, but right now I'd like to focus on writing and some more math-based projects.  Hopefully you will see those soon!
+
+[^1]: I never got the headshots to put on the page so left it templated.  Then I went to England the following year to study abroad and the website was replaced with a "Coming Soon" page.  Spoiler - it never came; you can still see it [here](http://innovateblockchain.org).  Most of the leadership of the club were seniors, and by the time I got back from my trip the club was essentially no more.  I got paid to make the site so them not using it wasn't a huge deal.  I don't know who is still paying for the domain.
+
+[^2]: The same guy that made the coming soon page.  He insisted on using Angular for the main site.
+
+[^3]: In hindsight I think this was actually a very simple fix - import from `next-mdx-remote/rsc` instead of `next-mdx-remote`.  This is my fault for not reading all of the documentation on their GitHub page, which, again, in hindsight seems like it should have been obvious.  However, in many hours of Googling and asking ChatGPT about the issue I don't reacall seeing any references to this.  Take this as an example of why you should never be reliant on ChatGPT.
