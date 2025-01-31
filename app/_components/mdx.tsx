@@ -3,6 +3,8 @@ import ExportedImage from "next-image-export-optimizer";
 import { MDXRemote } from "next-mdx-remote-client/rsc";
 import type { MDXRemoteOptions } from "next-mdx-remote-client/rsc";
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
@@ -120,6 +122,10 @@ const options: MDXRemoteOptions = {
   mdxOptions: {
     remarkPlugins: [
       remarkGfm,
+      remarkMath,
+    ],
+    rehypePlugins: [
+      rehypeKatex
     ],
   },
   parseFrontmatter: true,
