@@ -1,0 +1,92 @@
+---
+title: 'My First (Cool) Program'
+publishedAt: '2025-02-02'
+summary: 'A love letter to TI-Basic'
+---
+Boris Cherny taught me how to program.  I have never met him, I've never communicated with him in any way.  He doesn't know I exist.  But I'm not sure if I ever would have gotten into software development if not for him.
+
+When I was in middle school I got a TI-84 Plus: Silver Edition.  I made it a goal to learn what every button did.  In addition to all of the math operations there's a lot of different screens and options - a Stats menu with a dozen or so distributions, a combinatorics menu, a few different graphing styles and screens - it's a very advanced calculator!
+
+But one button, slightly towards the top and square in the center, taunted me - PRGM.  It was very confusing.  A blank menu.  But if you were to scroll over to Create New and entered a name, selecting PRGM brought up something completely different - a list of, what seemed to me at the time, random words: If, Then, Else, For...  I couldn't wrap my head around it.  What were these doing on a calculator?  They didn't have anything to do with math!
+
+Alas, I turned towards the internet to see what these buttons could possibly mean.  I quickly and fortunately stumbled upon [Boris Cherny's excellent guide](https://www.ticalc.org/programming/columns/83plus-bas/cherny/).  And the rest, they say, is history.
+
+I followed the guide to the tee and learned all the ins-and-outs of TI Basic.  I even used what I learned to teach one of my friends at school how to program (who, in turn, gave me my very first job at XLR8 Development a few years later).
+
+This article is about my experience with my first programming language, TI Basic.  But it's not about my actual first program, which was probably a 3 line program to calculate the area of a cylinder.  
+
+It's not about my most useful program, which was probably one that I would make in college many, many years later - COMPRREF, Complex Reduced Row Echelon Form.  This could solve systems of complex equations and made Linear Circuits a breeze.  
+
+It's not even about the programs that I made in advance of math competitions, pre-coding tricky algorithms to quickly take out questions that commonly came up, giving me a several minute advantage that I could put towards other questions I wasn't as familiar with.[^1]
+
+This is about Battleship.
+
+## Battleship for the TI-84
+
+<Figure src = "images/blog/my-first-program/splash_screen.png"
+        caption="An incredible splash screen created by my high school friend Neal Boman."
+/>
+
+I was always trying to come up with ideas for cool calculator games.  The clear fan-favorite was Tron - a two player version of Snake where you try to cut the other player off - but I wanted more.  The thought of porting Battleship to the calculator has crossed my mind, but it seemed clunky - you would have to keep passing the calculator back-and-forth every turn.  It just didn't seem like it would work.
+
+Some nights I would stay up late reading documentation on [tibasicdev.com](http://tibasicdev.wikidot.com), trying to learn new tricks or obscure math functions that I could use.  And one such night I stumbled across [`GetCalc(`](http://tibasicdev.wikidot.com/getcalc).  I, like most others, was aware that you could transfer data between calculators - that was how I distributed the programs I made.  But that night I learned that, with the command `GetCalc(`, this data could be sent programatically.
+
+This kind of blew my mind.  I suppose that it makes sense that the creators of the OS would open this functionality up to developers, but it's genuinely hard to imagine use-cases.  This is especially true when dealing with how janky and unreliable `GetCalc(` can be.  This is largely because, in order for `GetCalc(` to actually retrieve data, the sending calculator must be in a paused state - either a `Pause` or `Menu(` command.  If it can't retrieve the data it will simply lock the program.  Additionally there ended up being another major hurdle - while the cable I had was reversible, I noticed that one side didn't send data as nicely as the other did, requiring to be unplugged/replugged very frequently.  
+
+Despite some of the technical challenges the idea never left my mind.  Trying to port Battleship to the TI-84 was a daunting task, but that summer I sat down and made it happen.
+
+## The Development
+
+<Figure src = "images/blog/my-first-program/menu.png"
+        caption="The main menu of the program."
+/>
+
+All of the code can be viewed on my [GitHub](https://github.com/LSeaburg/TIBattleship), but, as it's a binary file, you may need to download TI-Connect to read it.  Even worse, however, is the fact that the code is heavily obfuscated.  TI-Basic only allows single letter variable names, and you can only be so descriptive with single-letter variable names.  Additionally, there are only so many letters, so different sections of the program repeat variables with completely different meanings.  
+
+When making this program I had a piece of graph paper mapping all of my 1-character variable names to actual descriptive variable names explaining what they did.  Unfortunately, despite years of repeated searchings, this piece of paper is lost to time.  
+
+But the naming scheme was just the first of the technical challenges.  
+
+TI-Basic has `Goto` commands, but no functions.  I found a way around this, however.  You can create other programs and call them.  Upon calling another program from within a program, it executes all the code of the inner program and continues execution of the original program - just like a function would!  You can't pass variables, but, if you write down all of the variables that a specific function uses, you can set all of those variables to what you want and then execute the program, just like a function![^2]
+
+After development I copied all of the code from the 'function' programs into the main program, repeating as necessary.  This was for ease of use - copying and archiving 1 program was much easier than remembering the 7 different ones that are used.  It did increase memory size to a whopping 14k bytes, and, even on the Silver Edition, it can be difficult to have enough space in RAM to unarchive and run it!  In hindsight I wish I had had better version control at the time so I would still have the files.  Which brings us to...
+
+Probably the biggest single challenge of creating this was the fact that I typed out the entire program on my calculator, with my tiny view of 8 lines on the screen at any given time.  This may sound insane (and it probably was) but I swear that TI Connect, which finally added a nice way to create and edit programs, didn't come out until a year or two after I created this.  The `.8xp` files are binary; you cannot just pop them into a text editor.  Looking back I'm sure there must have been some ways around this, but I didn't know that at the time.
+
+From a design perspective there wasn't anything too crazy.  Each board was stored in a matrix, and matrices were passed from calculator to calculator with the `GetCalc(` commands.  In order to know which matrix to store your ships in vs your opponent's, and who fires first and so on, you simply select "Host" or "Join" when you start a game.  Everything after that works pretty well.
+
+Testing was fairly difficult - I only had one calculator, after all.  But I would borrow my friend's TI-84 at school.  Once I got the basic flow down there weren't too many issues with the communication.
+
+I remember very clearly that the single hardest part of the entire program was making the ships blink during the orientation selection.  When you start a game you can move your cursor around to select a space and press enter to place your ship.  Then you can press any of the four arrow keys again to change the direction of your ship from that position, or delete to cancel out and choose a new space.  But until you confirm your layout, the ship blinks, indicating that it is a temporary placement.
+
+That was an absolute nightmare to implement in TI-Basic.  But I'm really proud of how it turned out.
+
+<Figure src = "gifs/blog/my-first-program/ship_selection_blink.gif"
+        caption="Ship is blinking while selecting ship orientation."
+/>
+
+I put a lot of polish into it.  Other TI-Basic devs would take some shortcuts with the UI and just try to get the logic working, but I cared a lot about how people would interact with the program.  All the menus I made were custom and carefully laid out.  I added a lot of fun graphics and played with different text sizes for different effects.    
+
+Even on the ship selection, for example, I made sure to check that a ship placement is valid when selecting an orientation - you can't let the user overlap with another ship or go off the side of the board.  Kicking the user back when no orientation for that square is valid.  It might sound simple but that is a pretty tough challenge for a somewhat beginner programmer to implement in TI-Basic.  Funnily enough I remember some people immediately testing this and being surprised when they found that I handled it correctly.
+
+There's one more funny quirk about the UI - for whatever reason, TI-Basic's built in function to draw circles is hilariously slow - when it draws the radar on the main menu they take FOREVER.  It would be trivial to hard-code them and dramatically improve performance.  But to me it's like an inside joke I have with the language and I find something about it delightfully retro.
+
+## Legacy
+
+Over the years I can probably count on one hand how many times I have played a full game of Battleship on my TI-84.  iPhones were a thing at that time, after all.  And sitting in close proximity with calculators connected by a cable wasn't covert in the same way that playing Block Dude or [Desolate](https://www.ticalc.org/archives/files/fileinfo/331/33153.html) might have been.  Plus the jankiness of the file transfers only going smoothly ~50% of the time was really a deal-breaker.  If someone pressed Enter to soon before the file actually transferred it was unrecoverable[^3].
+
+But TI-84 Battleship will always hold a very special place in my heart.  It reminds me of simpler times when the only reason I could possibly have to program was for fun.  When the only reason I made things was to see if I could.  And when I had the time and patience to type thousands of lines of code on a calculator.
+
+You can boot the game yourself by using this [emulator](https://www.cemetech.net/projects/jstified/) and getting the program code from GitHub, but unfortunately you will not be able to play a full game.  As far as I know, this emulator does not support sending data to other emulated calculators (and I can't blame them for not building that in).
+
+This year my TI-84's RAM cell battery expanded, popping off the back.  It no longer turns on.  The TI-84 Plus is still available for sale all these years later, but Texas Instruments has been slowly pushing it out of the way with the TI-84 Plus CE.  It has a higher pixel density color LED screen, and a similar model now lets your program in Python. 
+
+But this program defined an era.  Battleship was my magnum opus for the TI-84.  It was built in my first programming language, one I have no reason to ever touch again.  I was pushing the envelope of what was out there, making a program where 2 calculators could communicate back-and-forth with each other.  It was silly and fun.  And I miss those days.
+
+> **Note**: The photos were made possible by capturing screenshots from [this awesome emulator](https://www.cemetech.net/projects/jstified/) at cemetech.net.  I'm grateful that they're still keeping this technology alive and accessible.
+
+[^1]: A good example of this type of problem would be asking something along the line of "What is of $8^{2025} \mod 13$?"  This problem isn't too difficult, but I made a program where you could enter a base, say 8, an exponent, say 2025, and a modulus, say 13, and have the answer in an instant.
+
+[^2]: This works because all the variables are global and keep state throughout the execution of multiple programs.  You may be able to achieve the same thing with just labels and gotos, but it's a lot more complicated since you need to know where to send the program counter back to after executing the code inside of the label.  For example, if I need to draw an X in 5 different places in the program, I can Goto X, but after X gets drawn I have to instruct the program where to go to continue execution.
+
+[^3]: Honestly enabling a simply recovery option would have been a really easy fix - I'm not sure why I never implemented that.
