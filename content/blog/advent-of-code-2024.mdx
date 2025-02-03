@@ -9,7 +9,7 @@ On December 1st I was scrolling Hacker News when I came across a post for the [A
 
 While I first started coding in middle school, and was at one point going to major in Computer Science, I eventually switched to Electrical Engineering.  While I had kept coding in some jobs and personal projects, I've spent the last year as a DevOps engineer, creating pipelines and scripts but not doing the coding problems that I had been used to.  I have a few personal projects on the horizon, and I felt that Advent of Code would be a good way to try to reinvigorate my love of software while freshening up my Python.  Plus, at just one problem a day, I thought it would be fairly low-commitment, and easy to maintain.
 
-I didn't use an obsecure language or come from a non-coding background, but I thought I would share my experience.
+I didn't use an obscure language or come from a non-coding background, but I thought I would share my experience.
 
 ## My Experience
 
@@ -17,11 +17,11 @@ Overall I found Advent of Code to be highly enjoyable.  The goofy stories were f
 
 Because of both business and personal travel for the holidays I did my Advent of Code across 3 different timezones (Qatar, Eastern, and Mountain).  I'm going to blame that on my lack of placing on the leaderboard (as if I would have been fast enough on any of the problems).
 
-The commitment level ended up being a little greater than I had been expecting, though that may have partly been due to how rusty I was at programming.  While my code definately improved over the course of the month I finally hit the "wall" that people talk about, obsessing over a bug in my code for a full day.  Overall, however, most days I was able to push through very quickly, and the constant repetition is wonderful for picking up a new skill, or refreshing a rusty one.  This sort of daily ritual is something that I will try to keep in my life.
+The commitment level ended up being a little greater than I had been expecting, though that may have partly been due to how rusty I was at programming.  While my code definitely improved over the course of the month I finally hit the "wall" that people talk about, obsessing over a bug in my code for a full day.  Overall, however, most days I was able to push through very quickly, and the constant repetition is wonderful for picking up a new skill, or refreshing a rusty one.  This sort of daily ritual is something that I will try to keep in my life.
 
 Here I'm going to discuss my experience with some of my favorite problems with this year's Advent of Code.  All of the code is available in [my GitHub repo](https://github.com/LSeaburg/AOC_2024).
 
-### 1. Day 6 - Gaurd Gallivant
+### 1. Day 6 - Guard Gallivant
 
 Day 6 was the first day I had trouble.  Part 1 came very quickly, but part 2 was very difficult for me.  To this day it is the only one I have not optimized enough to run in under 10 seconds - it takes 40.  (I have one idea to try, but I don't know if it will make it fast enough.)
 
@@ -31,17 +31,17 @@ I was able to fix my code, but seeing his OOP design inspired me to re-write an 
 
 I love how people in the community are able to inspire and uplift each other like this.
 
-### 2. Day 11 - Memorizaition is Super Useful
+### 2. Day 11 - Caching is King
 
-The one more 'advanced' technique that was frequently used amongst a vast swath of the problems was that of memorization - at the end of a function store the result in a hashtable (Python's `dict()`).
+The one more 'advanced' technique that was frequently used amongst a vast swath of the problems was that of caching - at the end of a function store the result in a hash table (Python's `dict()`).
 
-Day's 11, 19, and 21 were all made fairly easy once memorization was applied (though day 21 was certainly a bit more complicated by the others).  While the technique is simple, I always find it extrodinary how adding a dict can reduce the computation time from several years to less than a second, and changing a recursive `foo() + foo()` to `2 * foo()` can change the number of function calls from 2^50 to 50.
+Day's 11, 19, and 21 were all made fairly easy once memoization was applied (though day 21 was certainly a bit more complicated by the others).  While the technique is simple, I always find it extraordinary how adding a dict can reduce the computation time from several years to less than a second, and changing a recursive `foo() + foo()` to `2 * foo()` can change the number of function calls from 2^50 to 50.
 
 ### 3. Day 15 - Recursion is Unreasonably Effective
 
 Recursive solutions kept coming so naturally to me throughout this month.  I think that doing some inductive proofs in my math courses have helped a lot.  It's incredibly useful to 'prove' recursive ideas to yourself with inductive reasoning, and I'd recommend researching a few inductive proofs to anyone who struggles with recursive code.
 
-That said, there were times when I over-used it.  In day 20, when I wanted to enumerate the track, I started with a recursive solution that quickly created a stack overflow, when a simple interative solution worked perfectly:
+That said, there were times when I over-used it.  In day 20, when I wanted to enumerate the track, I started with a recursive solution that quickly created a stack overflow, when a simple iterative solution worked perfectly:
 
 ```python
 # Changes every area on the map track to an int representing 
@@ -103,7 +103,7 @@ There was a lot of boilerplate that was required for testing the additions - set
 
 For one, you could analyze the wire structure and analytically determine which are out of place.  You may not even need the testing structure in that case.  On the other hand, you could randomly switch every combination of 4 wires and test the addition - though this would almost surely take too long to run.  While I liked the idea of analyzing the topology of the wires, I wasn't sure how to implement that, so I tried to narrow down the search possibilities.
 
-I created a directed graph from the wire inputs, but looking forward from the inputs shows all later outputs.  Makes sense, as the carry signal propogates through the entire circuit.  But, unexpectedly I saw that the first output of every input was at the same number, eg x0 was connected to z0, x1 and x1, and so on.  I was expecting 8 to not match, for the 4 swaps.  This made the problem trickier, as the 4 swaps where all 'intra-signal', swapped connections between the paths of x5, y5, and x5, for example.
+I created a directed graph from the wire inputs, but looking forward from the inputs shows all later outputs.  Makes sense, as the carry signal propagates through the entire circuit.  But, unexpectedly I saw that the first output of every input was at the same number, eg x0 was connected to z0, x1 and x1, and so on.  I was expecting 8 to not match, for the 4 swaps.  This made the problem trickier, as the 4 swaps were all 'intra-signal', swapped connections between the paths of x5, y5, and x5, for example.
 
 To approach this I created another directed graph of the reverse connections.  By interesting the paths of `(xn union yn) and (zn union z(n+1))` you can find the wires responsible solely for that addition and carry.  Now when we find a problem for a specific wire group we can try to swap only those wires until our addition works.  
 
@@ -113,7 +113,7 @@ To implement this we create a small set of test additions and iterate over the w
 
 I found the Advent of Code very fun and rewarding.  I also learned so much from revisiting Python and dedicating some time to these challenges.  It was so nice to invest some time into learning some of the basic libraries like `collections`, how to type my code properly, and other basic python principles that I may have known but haven't used in years.
 
-It's also nice to see myself improve.  I remember, in high school, writing a sudoku solver in a week or two.  This week I wrote a brand new sudoku solver in Python in an hour or two.  I think Advent of Code is a fantasic way to both stay fresh or improve your code.  Maybe next year I'll try to complete it in a functional programming language, something I don't have as much familiarity with.
+It's also nice to see myself improve.  I remember, in high school, writing a sudoku solver in a week or two.  This week I wrote a brand new sudoku solver in Python in an hour or two.  I think Advent of Code is a fantastic way to both stay fresh or improve your code.  Maybe next year I'll try to complete it in a functional programming language, something I don't have as much familiarity with.
 
 
 [^1]: I had misunderstood the question.  It's somewhat technical, but for every square that the guard moved into I was testing whether placing a block there would cause the guard to enter a loop.  The actual question was which squares can you place a block that will cause the guard to enter a loop.  This is different because if a guard visits the same square twice, but there is a block there, he will not approach that block from the second direction.
