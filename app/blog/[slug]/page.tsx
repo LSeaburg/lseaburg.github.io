@@ -86,7 +86,7 @@ export default function Blog({ params }) {
         {post.metadata.title}
       </h1>
       <h2 className='subtitle font-medium text-lg tracking-tight mt-1'>
-      {post.metadata.summary}
+        {post.metadata.summary}
       </h2>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">

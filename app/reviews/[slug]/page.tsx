@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/_components/mdx'
+import ExportedImage from "next-image-export-optimizer";
 import { formatDate, getReviewPosts } from 'app/utils'
 import { baseUrl } from 'app/sitemap'
 
@@ -82,9 +83,18 @@ export default function Reviews({ params }) {
           }),
         }}
       />
-      <h1 className="title font-semibold text-2xl tracking-tighter">
-        {post.metadata.title}
+      <ExportedImage            
+            src = {post.metadata.image || ''}
+            alt={post.metadata.title} 
+            className="rounded-lg relative" 
+            width={1000}
+            height={1000} />
+      <h1 className="title font-semibold text-2xl tracking-tighter mt-3">
+        <CustomMDX source={post.metadata.title} />
       </h1>
+      <h2 className='subtitle font-medium text-lg tracking-tight mt-1'>
+        <CustomMDX source={post.metadata.summary} />
+      </h2>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
