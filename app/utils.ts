@@ -54,7 +54,7 @@ export function getBlogPosts() {
 }
 
 export function getReviewPosts() {
-  return getPosts('review')
+  return getPosts('reviews')
 }
 
 function getPosts(postType) {
