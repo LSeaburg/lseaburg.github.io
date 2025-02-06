@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { formatDate, getReviewPosts } from 'app/utils'
 import { CustomMDX } from 'app/_components/mdx'
+import ExportedImage from "next-image-export-optimizer";
 
 export function ReviewPosts() {
   let allReviews = getReviewPosts()
@@ -31,11 +32,27 @@ function Review(props) {
       className="flex flex-col space-y-1 mb-4"
       href={`/reviews/${post.slug}`}
     >
-      <div className="w-full flex flex-col md:flex-row space-x-0 md:space-x-2">
-        <p className="text-neutral-600 dark:text-neutral-400 w-[140px] tabular-nums">
-          {formatDate(post.metadata.publishedAt, false)}
-        </p>
-        <CustomMDX source={post.metadata.title} />
+      <div className="flex">
+        {/* Image Section */}
+        <div className="flex-shrink-0">
+          <ExportedImage            
+              src = {post.metadata.image || ''}
+              alt={post.metadata.title} 
+              className="rounded-lg relative" 
+              width={100}
+              height={100} />
+        </div>
+
+        {/* Text Section */}
+        <div className="ml-4">
+          <h2 className="text-xl font-semibold tracking-tighter">
+            <CustomMDX source={post.metadata.title} />
+          </h2>
+          <CustomMDX className="text-gray-600 text-sm mt-1" source={post.metadata.summary} />
+          <p className="text-xs text-neutral-600 dark:text-neutral-400 w-[140px] tabular-nums">
+            {formatDate(post.metadata.publishedAt, false)}
+          </p>
+        </div>
       </div>
     </Link>
   )
