@@ -4,6 +4,10 @@ import ExportedImage from "next-image-export-optimizer";
 import { formatDate, getReviewPosts } from 'app/utils'
 import { baseUrl } from 'app/sitemap'
 
+function stripSpecialCharacters(input: string): string {
+  return input.replace(/[^a-zA-Z0-9\s]/g, '');
+}
+
 export async function generateStaticParams() {
   let posts = getReviewPosts()
 
@@ -24,6 +28,9 @@ export function generateMetadata({ params }) {
     summary: description,
     image,
   } = post.metadata
+
+  title = stripSpecialCharacters(title);
+
   let ogImage = image
     ? image
     : `${baseUrl}/og?title=${encodeURIComponent(title)}`
@@ -61,28 +68,6 @@ export default function Reviews({ params }) {
 
   return (
     <section>
-      <script
-        type="application/ld+json"
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${baseUrl}${post.metadata.image}`
-              : `/og?title=${encodeURIComponent(post.metadata.title)}`,
-            url: `${baseUrl}/reviews/${post.slug}`,
-            author: {
-              '@type': 'Person',
-              name: 'Logan Seaburg',
-            },
-          }),
-        }}
-      />
       <ExportedImage            
             src = {post.metadata.image || ''}
             alt={post.metadata.title} 
