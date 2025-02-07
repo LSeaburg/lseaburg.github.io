@@ -29,18 +29,18 @@ function Review(props) {
   return (
     <Link
       key={post.slug}
-      className="flex flex-col space-y-1 mb-4"
+      className="flex flex-col space-y-1 mb-8"
       href={`/reviews/${post.slug}`}
     >
       <div className="flex">
         {/* Image Section */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mt-1">
           <ExportedImage            
               src = {post.metadata.image || ''}
               alt={post.metadata.title} 
               className="rounded-lg relative" 
-              width={100}
-              height={100} />
+              width={120}
+              height={120} />
         </div>
 
         {/* Text Section */}
