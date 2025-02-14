@@ -27,7 +27,7 @@ function BlogPost(props) {
   return (
     <Link
       key={post.slug}
-      className="block mb-6 border-b border-neutral-200 dark:border-neutral-700 pb-4 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+      className="block mb-6 border-b border-neutral-200 dark:border-neutral-700 pb-4 transition"
       href={`/blog/${post.slug}`}
     >
       <div className="w-full flex flex-col space-y-1">
