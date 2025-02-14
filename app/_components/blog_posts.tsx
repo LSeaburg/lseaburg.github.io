@@ -16,27 +16,32 @@ export function BlogPosts() {
           return 1
         })
         .map((post) => (
-          <Review post={post}/>
+          <BlogPost post={post}/>
         ))}
     </div>
   )
 }
 
-function Review(props) {
+function BlogPost(props) {
   let post = props.post
   return (
     <Link
       key={post.slug}
-      className="flex flex-col space-y-1 mb-4"
+      className="block mb-6 border-b border-neutral-200 dark:border-neutral-700 pb-4 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
       href={`/blog/${post.slug}`}
     >
-      <div className="w-full flex flex-col md:flex-row space-x-0 md:space-x-2">
-        <p className="text-neutral-600 dark:text-neutral-400 w-[140px] tabular-nums">
+      <div className="w-full flex flex-col space-y-1">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt, false)}
         </p>
-        <p className="text-neutral-900 dark:text-neutral-100 tracking-tight">
+        <h2 className="text-lg md:text-xl font-medium text-neutral-900 dark:text-neutral-100">
           {post.metadata.title}
-        </p>
+        </h2>
+        {post.metadata.summary && (
+          <p className="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-2">
+            {post.metadata.summary}
+          </p>
+        )}
       </div>
     </Link>
   )
