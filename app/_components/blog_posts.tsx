@@ -16,13 +16,17 @@ export function BlogPosts() {
           return 1
         })
         .map((post) => (
-          <BlogPost post={post}/>
+          <BlogPost post={post} unlisted={post.metadata.unlisted} />
         ))}
     </div>
   )
 }
 
 function BlogPost(props) {
+  if (props.unlisted) {
+    return
+  }
+
   let post = props.post
   return (
     <Link
