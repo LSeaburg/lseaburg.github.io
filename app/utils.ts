@@ -10,8 +10,23 @@ type Metadata = {
   image?: string
 }
 
-function getMDXFiles(dir) {
-  return fs.readdirSync(dir).filter((file) => path.extname(file) === '.mdx')
+function getMDXFiles(dir, baseDir = dir) {
+  let results: string[] = [];
+  const files = fs.readdirSync(dir);
+
+  files.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const relativePath = path.relative(baseDir, filePath);
+    
+    if (fs.statSync(filePath).isDirectory()) {
+      // Recursively search subdirectories
+      results = results.concat(getMDXFiles(filePath, baseDir));
+    } else if (path.extname(file) === '.mdx') {
+      results.push(relativePath);
+    }
+  });
+
+  return results;
 }
 
 function getMDXData(dir) {
