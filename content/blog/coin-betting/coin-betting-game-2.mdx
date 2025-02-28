@@ -1,0 +1,190 @@
+---
+title: 'Part 2 - Analysis and Simulations'
+publishedAt: '2025-02-24'
+summary: 'Simulating the situation in question'
+unlisted: True
+---
+This is the part 2 of a 3 part series analyzing a betting game.  If you'd like to jump to another part here are direct links:
+- [Intro Page](/blog/coin-betting-game-intro)
+- [Part 1 - A Simpler Problem](/blog/coin-betting-game-1) 
+- [Part 2 - Analysis and Simulations](/blog/coin-betting-game-2) (You are here)
+- [Part 3 - Mathematical Restructuring](/blog/coin-betting-game-3) 
+- [Conclusion](/blog/coin-betting-game-conclusion) 
+
+### The Actual Problem
+
+Let's return.  Two coins, one showing heads with probability $p$, the other showing tails with probability $p$.  Even money bets over $r$ rounds.
+
+Because the bets are even money, where you can win as much as you can lose each round, we know that 
+$$
+f = P - Q
+$$
+where $P$ is the probability of the coin showing heads and $Q$ is the probability that the coin shows tails.  Note that $p$ is the probability that the biased coin weighted heads will show heads, $q$ that that coin will show tails, and vice versa for the other coin.
+
+The probability that the flip will show heads, $P$, depends on, naturally, which coin you're flipping.  And the confidence of which coin your flipping, in turn, depends on the history of the flips seen, namely $h$, the number of heads seen, and $t$, the number of tails seen.  
+
+Let's denote $P(H|e)$, the probability that the coin being flipped is the coin biased towards heads given the evidence that we have seen.  Let $P(T|e)$ be the probability that the coin being flipped is the coin biased towards tails.  Here $e=(h,t)$, a tuple of the flips we have seen so far.
+
+Thus
+$$
+\begin{align}
+f &= P - Q \notag \\
+  &= p\cdot P(H|e) + q\cdot P(T|e) - (p\cdot P(T|e) + q\cdot P(H|e) ) \notag \\
+  &= (p-q)P(H|e) + (q-p)P(T|e) \notag \\
+  &= (p-q)(P(H|e)-P(T|e)) \notag
+\end{align}
+$$
+Here $P(H) = P(T) = 0.5$, the probability that the dealer picked the given coin.  We can use Bayes' theorem to find
+$$
+P(H|e) = \frac{P(e|H) \cdot P(H)}{P(e)}
+$$
+where 
+$$
+P(e) = P(e|H)P(H) + P(e|T)P(T)
+$$
+so 
+$$
+\begin{align}
+P(H|e) &= \frac{\frac{1}{2}\binom{h+t}{h}p^hq^t}{\frac{1}{2}\binom{h+t}{h}p^hq^t + \frac{1}{2}\binom{h+t}{t}q^hp^t} \notag \\
+  &= \frac{p^hq^t}{p^hq^t + q^hp^t} \notag
+\end{align}
+$$
+where, symmetrically, 
+$$
+P(T|e) = \frac{q^hp^t}{p^hq^t + q^hp^t}
+$$
+Thus
+$$
+f = P - Q = (p-q)\cdot \frac{p^hq^t - q^hp^t}{p^hq^t + q^hp^t}
+$$
+So $f$ is the optimal amount of money to wager every round.  Note that when $h$ = $t$ the amount to wager is 0, since there is 50-50 chance of which coin is being flipped, and as $h \gg t$ the wager becomes $p-q$, the standard even money bet value we found in Part 1.
+
+Also note that this value is positive for $h > t$ and negative for $h < t$ because in the beginning we assumed that $P$ was the probability for heads and $Q$ for tails.  In practice this means that a negative $f$ indicates one should take on the reverse bet - bet on tails instead of heads.  In either situation the magnitude of the bet will be the same.
+
+### Simulating the Game
+
+In the last part we had a simple equation to find the total expected value:
+$$
+\operatorname {E} [S]=((1+f)^p + (1-f)^q)^r
+$$
+Unfortunately this will not work here.  This is because in the last case the probability was constant and $f$ did not change.
+
+While the probability of the coin is constant throughout the game, the effective probability $P$ that the next flip will be heads changes every round as more information about the coin is revealed.  So too, then, does $f$, the fraction of the stake to wager, change.
+
+Thus we will need to write some code to solve this problem.  For all of the following we will continue to assume that we can make bets sized to arbitrarily small fractions of a cent for simplicity.
+
+First we can create a function to obtain the value of $f$ based on the bias in the coins and the history of the coin seen:
+
+```python
+def get_bet_frac(p: float, h: int, t: int) -> float:
+  q = 1-p
+  pq = p ** h * q ** t
+  qp = q ** h * p ** t
+
+  frac = (pq - qp) / (pq + qp)
+  return (p - q) * frac
+```
+This function will be positive for bets on heads and negative for bets on tails.
+
+We can simulate flips by writing another simple function to get a coin flip given a specified bias:
+
+```python
+def get_coin_flip(p: float) -> str:
+  if random.random() < p:
+    return "h"
+  return "t"
+```
+where $p$ is always defined in terms of heads ($0 < p < 0.5$ can be passed for a coin biased towards tails).
+
+It is then fairly trivial to implement the logic to simulate the betting process over $r$ rounds: 
+
+```python
+def simulate_flips(bias: float, rounds: int) -> float:
+  seen = {'h': 0, 't': 0}
+  stake = 1.0
+
+  for _ in range(rounds):
+    wager = get_bet_frac(bias, seen['h'], seen['t'])
+    flip = get_coin_flip(bias)
+    seen[flip] += 1
+
+    if flip == 'h': # if wager is positive bet is on heads, negative for tails
+      stake *= (1 + wager)
+    else:
+      stake *= (1 - wager)
+
+  return stake
+```
+This is great for seeing output values one at a time, but it doesn't help us find the expected value.  For that we need to iterate over all possible permutations of flips.
+
+### Finding the Expected Winnings
+
+We can brute force a simulation over all possible patterns of length $r$ and take the average of that to find the expected value.
+
+Similar to before we define a function to take in a pattern of flips and return a final stake:
+```python
+def simulate_pattern(bias: float, pattern: int) -> float:
+  seen = {'h': 0, 't': 0}
+  stake = 1.0
+  for flip in pattern:
+    wager = get_bet_frac(bias, seen['h'], seen['t'])
+
+    seen[flip] += 1
+    if flip == 'h': # wager is positive is bet is on heads, negative for tails
+      stake *= (1 + wager)
+    else:
+      stake *= (1 - wager)
+
+  return stake
+```
+Then we call the this function for every possible pattern of a certain length to gather all of the possible values we could end with.
+```python
+stake_values = dict()
+for num_of_heads in range(rounds + 1):
+  stake_values.update({(num_of_heads, rounds - num_of_heads): []})
+
+for num_of_heads in range(rounds + 1):
+  for pattern_type in combinations(range(rounds), num_of_heads):
+    pattern = ['h'] * rounds
+    for num in pattern_type:
+      pattern[num] = 't'
+
+    stake = simulate_pattern(bias, pattern)
+    stake_values[(num_of_heads, rounds - num_of_heads)].append(stake)
+```
+Afterwards we take the average for every permutation of a heads:tails combination because they are equally likely (for example, average together the ending stakes of all permutations with 15 heads and 5 tails):
+```python
+avg_stake = dict()
+for key in stake_values:
+  avg_stake.update({key: sum(stake_values[key])/len(stake_values[key])})
+```
+Finally we take the obtain the expected value by taking a weighted average of all of these averages.  Here we must weight the ending stake's value by the probability that the specific combination of heads/tails occurred.
+
+With another method to calculate that probability
+```
+def get_prob_outcome(p: int, h: int, t: int) -> float:
+  return p ** h * (1 - p) ** t * comb(h + t, h)
+```
+we can find the overall expected value:
+```python
+expected_value = 0
+for heads in range(rounds + 1):
+  tails = rounds - heads
+  probability = get_prob_outcome(bias, heads, tails)
+  expected_value += avg_stake[(heads, tails)] * probability
+  
+print('The expected value is {}'.format(expected_value))
+```
+Now we finally have an answer!  With an initial stake of 1, after 20 flips the ending stake has an expected value of 234.287.  
+
+We can also get our median value with 
+```python
+expected_heads = round(bias * rounds)
+expected_tails = rounds - expected_heads
+median_val = avg_stake[(expected_heads, expected_tails)]
+
+print('The most probable value is {}'.format(median_val))
+```
+and see that it is 23.612.
+
+Continue reading to [Part 3](/blog/coin-betting-game-3), which will reexamine the solution from Part 2 from a mathematical standpoint.  This part will include proofs that point to a way to drastically speed up this calculation.  Code for this new method will be provided.

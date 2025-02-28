@@ -1,0 +1,140 @@
+---
+title: 'Appendix'
+publishedAt: '2025-02-24'
+summary: 'Proofs and additional notes'
+unlisted: True
+---
+If you'd like to jump to another part here are direct links:
+- [Intro Page](/blog/coin-betting-game-intro) 
+- [Part 1 - A Simpler Problem](/blog/coin-betting-game-1)
+- [Part 2 - Analysis and Simulations](/blog/coin-betting-game-2) 
+- [Part 3 - Mathematical Restructuring](/blog/coin-betting-game-3) 
+- [Conclusion](/blog/coin-betting-game-conclusion)
+
+### Proof: $F(n)\cdot F(-n - 1) = F(-1)$
+Where 
+$$
+F(n) = 1+(p-q) \cdot \frac{p^n - q^n}{p^n + q^n}
+$$
+and $0 < p < 1$ and $p + q = 1$ we will show that
+$$
+F(n)\cdot F(-n - 1) = F(-1)
+$$
+We will denote
+$$
+\begin{align}
+g(n) &= \frac{p^n - q^n}{p^n + q^n} \notag \\
+f(n) &= (p-q) \cdot g(n) \notag \\
+  &= (2p - 1) \cdot g(n) \notag \\
+\end{align}
+$$
+so
+$$
+F(n) = 1+f(n)
+$$
+We also know that
+$$
+g(n) = g(-n)
+$$
+since
+$$
+\begin{align}
+g(-n) &= \frac{p^{-n} - q^{-n}}{p^{-n} + q^{-n}} \notag \\
+  &= \frac{\frac{1}{p^n} - \frac{1}{q^n}}{\frac{1}{p^n} + \frac{1}{q^n}} \notag \\
+  &= \frac{\frac{q^n}{p^nq^n} - \frac{p^n}{p^nq^n}}{\frac{q^n}{p^nq^n} + \frac{p^n}{p^nq^n}} \notag \\
+  &= \frac{q^n - p^n}{p^n + q^n} \notag \\
+  &= -\frac{p^n - q^n}{p^n + q^n} \notag \\
+g(-n) &= -g(n) \notag
+\end{align}
+$$
+When $p = 0.5$ this is trivial since $F(n) = 0 \forall n \in \Z$.  
+
+In the case $p \neq 0.5$ we begin by showing
+$$
+\begin{align}
+F(-1) &= 1+(p-q) \cdot \frac{p^{-1} - q^{-1}}{p^{-1} + q^{-1}} \notag \\
+  &= 1+(p-(1-p)) \cdot \frac{p^{-1} - (1-p)^{-1}}{p^{-1} + (1-p)^{-1}} \notag \\
+  &= 1+(2p-1) \cdot \frac{\frac{1}{p} - \frac{1}{1-p}}{\frac{1}{p} + \frac{1}{1-p}} \notag \\
+  &= 1+(2p-1) \cdot \frac{\frac{1-p}{p(1-p)} - \frac{p}{p(1-p)}}{\frac{1-p}{p(1-p)} + \frac{p}{p(1-p)}} \notag \\
+F(-1) &= 1+(2p-1) \cdot (1-2p)
+\end{align}
+$$
+Now consider
+$$
+\begin{align}
+&F(n)\cdot F(-n - 1) = (1+f(n))\cdot (1+f(-n-1)) \notag \\
+  &= 1+f(n)+f(-n-1)+f(n)\cdot f(-n-1) \notag \\
+  &= 1+(2p-1)g(n)+(2p-1)g(-n-1)+(2p-1)^2g(n)\cdot g(-n-1) \notag \\
+  &= 1+(2p-1)(g(n)-g(n+1)-(2p-1)g(n)\cdot g(n+1)) \\
+\end{align}
+$$
+Comparing equations $(1)$ and $(2)$ we see that the equations have equality if we show that 
+$$
+g(n)-g(n+1)-(2p-1)g(n)\cdot g(n+1) = 1-2p
+$$
+or, negating both sides,
+$$
+(2p-1)g(n)\cdot g(n+1)-g(n)+g(n+1) = 2p-1
+$$
+Moving terms we obtain
+$$
+(2p-1)g(n)\cdot g(n+1) - (2p-1) = g(n) - g(n+1)
+$$
+Where we can factor to obtain
+$$
+(2p-1) (g(n)\cdot g(n+1) - 1) = g(n) - g(n+1)
+$$
+Then after dividing and moving terms, which we can do because $p \neq 0.5$, we get
+$$
+g(n)\cdot g(n+1) = 1 + \frac{g(n) - g(n+1)}{2p-1}
+$$
+So we will show that this equality holds.
+
+First, consider
+$$
+\begin{align}
+g(n)\cdot g(n+1) &= \frac{p^n - q^n}{p^n + q^n} \cdot \frac{p^{n+1} - q^{n+1}}{p^{n+1} + q^{n+1}} \notag \\
+  &= \frac{p^{2n+1} + q^{2n+1} - p^nq^{n+1} - p^{n+1}q^n}{p^{2n+1} + q^{2n+1} + p^nq^{n+1} + p^{n+1}q^n} \notag \\
+  &= 1 + \frac{- 2p^nq^{n+1} - 2p^{n+1}q^n} {p^{2n+1} + q^{2n+1} + p^nq^{n+1} + p^{n+1}q^n}
+\end{align}
+$$
+Now consider
+$$
+\begin{align}
+&1 + \frac{g(n) - g(n+1)}{2p-1} = 1 + \frac{\frac{p^n - q^n}{p^n + q^n} - \frac{p^{n+1} - q^{n+1}}{p^{n+1} + q^{n+1}}}{2p-1} \notag \\
+  &= 1 + \frac{\frac{(p^n - q^n)\cdot (p^{n+1} + q^{n+1})}{(p^n + q^n)\cdot (p^{n+1} + q^{n+1})} - \frac{(p^{n+1} - q^{n+1})\cdot (p^n + q^n)}{(p^n + q^n)\cdot (p^{n+1} + q^{n+1})}}{2p-1} \notag \\
+  &= 1 + \frac{\frac{p^{2n+1} + p^nq^{n+1} - p^{n+1}q^n - q^{2n+1} - p^{2n+1} - p^{n+1}q^n + p^nq^{n+1} + q^{2n+1}}{p^{2n+1} + q^{2n+1} + p^nq^{n+1} + p^{n+1}q^n}}{2p-1} \notag \\
+  &= 1 + \frac{\frac{2p^nq^{n+1} - 2p^{n+1}q^n}{p^{2n+1} + q^{2n+1} + p^nq^{n+1} + p^{n+1}q^n}}{2p-1} \notag \\
+  &= 1 + \frac{\frac{2p^nq^{n+1} - 2p^{n+1}q^n}{2p-1}}{p^{2n+1} + q^{2n+1} + p^nq^{n+1} + p^{n+1}q^n}
+\end{align}
+$$
+Similar to before, by examining equations $(3)$ and $(4)$ we can determine equality if we can show that 
+$$
+- 2p^nq^{n+1} - 2p^{n+1}q^n = \frac{2p^nq^{n+1} - 2p^{n+1}q^n}{2p-1}
+$$
+Multiplying by $2p-1$ gives
+$$
+- 4p^{n+1}q^{n+1} - 4p^{n+2}q^n + 2p^nq^{n+1} + 2p^{n+1}q^n = 2p^nq^{n+1} - 2p^{n+1}q^n
+$$
+Canceling and moving terms yields
+$$
+- 4p^{n+1}q^{n+1} - 4p^{n+2}q^n = -4p^{n+1}q^n
+$$
+After factoring
+$$
+- 4p^{n+1}q^n \cdot (q+p) = -4p^{n+1}q^n
+$$
+Since $q = 1-p$,
+$$
+q + p = (1-p)+p = 1
+$$
+So 
+$$
+- 4p^{n+1}q^n = - 4p^{n+1}q^n
+$$
+and we have shown equality.
+
+Thus
+$$
+F(n)\cdot F(-n - 1) = F(-1)
+$$

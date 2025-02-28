@@ -1,0 +1,50 @@
+---
+title: 'Betting on Symmetrically Biased Coins'
+publishedAt: '2025-02-24'
+summary: 'An exploration of a deceptively deep quant interview type question'
+unlisted: True
+---
+This is the introduction of a 3 part series analyzing a betting game.  If you'd like to jump to another part here are direct links:
+- [Intro Page](/blog/coin-betting-game-intro) (You are here)
+- [Part 1 - A Simpler Problem](/blog/coin-betting-game-1)
+- [Part 2 - Analysis and Simulations](/blog/coin-betting-game-2) 
+- [Part 3 - Mathematical Restructuring](/blog/coin-betting-game-3) 
+- [Conclusion](/blog/coin-betting-game-conclusion) 
+
+### The Setup
+
+Consider the following casino game:
+
+A dealer has two weighted coins - one is biased to show heads 80\% of the time, the other is biased to show tails 80\% of the time.  The dealer picks one coin at random, then plays 20 consecutive rounds with that coin.  At each round you are allowed to make even money bets on the outcomes of coin flip. 
+
+For example, say you start with a stake of \$10.  In the first round you can bet \$2 on heads.  If the coin shows heads you win the amount you bet, bringing your total to \$12.  If the coin shows tails, you lose your bet, bringing your new total to \$8.    
+
+What is the best strategy and how much can you expect to win?  How do these conditions change with different $p$, the bias of the coins, and $r$, the number of rounds played with the same coin?
+
+### Motivation
+
+This game might seem arbitrary or contrived.  However, there are many reasons to study such a game.
+
+First off, it's fun!  Puzzles like this can be a great way to exercise your brain.  This particular problem ends up being deceptively deep and there are many twists before you get an optimized answer.
+
+But this puzzle can deliver some practical insight and foundation.  At its core it's a betting in a market where you know an underlying asymmetry exists, but you are unsure of what that exact asymmetry looks like.  And in this way, this problem can be expandede even further within the same structure.  Maybe the coins are still symmetrically biased, but the level of bias is unknown.  Or maybe the coins are asymmetrically biased, for example.
+
+Lastly, the best way to learn how to solve hard problems is to study easier problems.  I decided to tackle this puzzle in advance of attempting a much more complex project that I am about to undertake.  This is a relatively simple problem that can act as a good gateway into understanding much more complicated market behaviors.
+
+This is almost certainly more involved than anything you would actually see in a quantitive interview.  To go from start to finish should take longer than the time constraints any interview would allow.  But in some ways, that's one of its strengths, as it lets you go a lot deeper into some core workings of probability.  This will allow you to develop better intuition than you would be able to get from some easier puzzles.
+
+I created this particular puzzle and, while I'm not sure it's so unique that it has never been thought of before, I couldn't find anything similar after a brief search on the internet.  So I thought it would be worthwhile to write up a full explanation and solution.
+
+### Sections
+
+While this was originally planned as a single article I've decided to break it into 3 parts to help with organization. 
+
+[Part 1](/blog/coin-betting-game-1) is going to focus on a simpler example with a single coin.  This will lay some of the foundations that we will build on, such as the Kelly Criterion and the nature of expected value.
+
+[Part 2](/blog/coin-betting-game-2) will explore the actual problem as proposed.  This will answer the basic question and includes some Python to simulate the problem and perform some calculations.
+
+[Part 3](/blog/coin-betting-game-3) will reexamine the solution from Part 2 from a mathematical standpoint.  This part will include proofs that point to a way to drastically speed up this calculation.  Code for this new method will be provided.
+
+The [Conclusion](/blog/coin-betting-game-conclusion) will provide some insight into simulating games and wrap up the series.
+
+Continue to [Part 1](/blog/coin-betting-game-1) to learn some of the fundamental strategies employed in analyzing betting games.

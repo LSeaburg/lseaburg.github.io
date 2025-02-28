@@ -1,0 +1,239 @@
+---
+title: 'Part 3 - Mathematical Restructuring and Optimizations'
+publishedAt: '2025-02-24'
+summary: 'Using a more direct mathematical approach'
+unlisted: True
+---
+This is the part 3 of a 3 part series analyzing a betting game.  If you'd like to jump to another part here are direct links:
+- [Intro Page](/blog/coin-betting-game-intro)
+- [Part 1 - A Simpler Problem](/blog/coin-betting-game-1) 
+- [Part 2 - Analysis and Simulations](/blog/coin-betting-game-2)
+- [Part 3 - Mathematical Restructuring](/blog/coin-betting-game-3)  (You are here)
+- [Conclusion](/blog/coin-betting-game-conclusion) 
+
+### Simulating is Slow
+
+In Part 2 we were able to simulate the coin flips in Python.  We simulated all possible permutations of flips to calculate the expected value after a specified number of rounds.
+
+This works, but is very slow.  The code's runtime is approximately $O(n\cdot 2^n)$ and on my machine it takes nearly 8 seconds to simulate 20 rounds.  25 rounds takes about 5 minutes.  50 rounds would take well over 250 years to simulate.
+
+There are some nice tricks you can use to greatly speed up the computation.  Implementing a dynamic programming algorithm can cut the run time down to $O(n^3)$.  This is a huge improvement, making large calculations feasible.
+
+However, by using some clever math there is a way to cut the runtime down to $O(n)$.  You can simulate 1000 rounds in less than 100 milliseconds.
+
+### Betting Wagers as Functions
+
+Consider the amount that you should wager 
+$$
+f(h, t) = (p-q)\cdot \frac{p^hq^t - q^hp^t}{p^hq^t + q^hp^t}
+$$
+where $p$ is a constant and $q=p-1$.
+
+We can show that this is equivalent to 
+$$
+f(n) = (p-q)\cdot \frac{p^n - q^n}{p^n + q^n}
+$$
+Let $n=h-t$, so $h=n+t$.  Then
+$$
+\begin{align}
+f(h, t) &= (p-q)\cdot \frac{p^hq^t - q^hp^t}{p^hq^t + q^hp^t} \notag \\
+  &= (p-q)\cdot \frac{p^np^tq^t - q^nq^tp^t}{p^np^tq^t + q^nq^tp^t} \notag \\
+  &= (p-q)\cdot \frac{(p^tq^t) (p^n - q^n)}{(p^tq^t) (p^n + q^n)} \notag \\
+  &= (p-q)\cdot \frac{p^n - q^n}{p^n + q^n} \notag \\
+\end{align}
+$$
+Now we define 
+$$
+F(n) = 1 + f(n)
+$$
+representing the change of the stake from a bet.  We have to be careful here since $n>0$ is winning the bet and $n<0$ is losing the bet.  The magnitude of $n$ is $|h-t|$.  The sign is determined by both whether $h>t$ or $h<t$ and the result of the flip.
+
+In other words, flipping heads when $h=5, t=3$ results in multiplying the stake by $F(2)$, but flipping tails in the same situation results $F(-2)$.
+
+We can show that
+$$
+F(n)\cdot F(-n - 1) = F(-1)
+$$
+The proof is tedious and algebraic so it will be provided on a [separate page](/blog/coin-betting-game-appendix).
+
+### Proving the Order of Flips is Invariant
+
+We will show that, for any permutation of flips $P$ with $h$ heads and $t$ tails, the resulting stake will be 
+$$
+\begin{align}
+s = s_0 * F(-1)^c * \prod_{i=1}^{d} F(i-1)
+\end{align}
+$$
+for $c = \min(h, t), d = \max(h, t) - c$.
+
+Consider any permutation $P$ with $h$ heads and $t$ tails, where $P_i$ is the $i^\text{th}$ element in the permutation.  
+
+Let $v(i)$ be equal to the cumulative total of heads seen minus the cumulative total of tails seen before position $i$.  Formally
+$$
+v(i) =
+\begin{cases} 
+  0, & \text{if } i = 1 \\
+  v(i-1) + 1, & \text{if } P_{i-1} = ``h" \\
+  v(i-1) - 1, & \text{if } P_{i-1} =  ``t"
+\end{cases}
+$$
+$|v(i)|$, then, is the amount wagered on every turn $i$.
+
+Let
+$$
+s(i) =
+\begin{cases} 
+  1, & P_{i} = ``h" \\
+  - 1, & P_{i} = ``t"
+\end{cases}
+$$
+and 
+$$
+u(i) = s(i) \cdot v(i)
+$$
+so
+$$
+s = s_0 * \prod_{i} F(u(i))
+$$
+
+
+Define a dominating streak $D$ from $j$ to $k$ where $v(j)=0$ and $v(k+1)=0$ and $v(i) \neq 0 \forall i \in \{j+1, j+2,..., k\}$.  
+
+We can write our permutation as a series of dominating streaks $D'D''...D^{(n)}E$, where $E$ is the final sub-sequence of the permutation after the last dominating streak.  Note that $E$ could have length $0$.
+
+Consider any such dominating streak $D$ of length $n$.  Assume, without loss of generality, that $P_1=h$ so $v(i)>0\forall i \in \{2, 3,..., n\}$.
+
+Let 
+$$
+C_S(x) = \sum_i^S[S_i=x]
+$$
+the number of elements equal to $x$ in the sequence $S$.
+
+Since $v(1) = 0$ and $v(n+1)=0$, and the presence of $``h"$ increments the value of $v$ by $1$ and the presence of $``t"$ decrements the value of $v$ by $1$ $C_D(``h")=C_D(``t") = (n+1)/2$.  
+
+Since $P_1=``h"$, $C_{D_{2...n}}(``t") = (n+1)/2$.  Because $v(i) > 0 \forall i \in \{2...n\}$ we know that $u(i) < 0 \iff D_i=``t"$.  So over $D$, there are $(n+1)/2$ values of $i$ where $u(i) < 0$ and $(n+1)/2$ values of $i$ where $u(i) \geq 0$.
+
+Consider the set $I$ of $i$ where $u(i) \geq 0$ in $D$.  Pick one such $i$ and let $u(i)=w$.  Because we know that every increment has a corresponding decrement, we know that there must be an index $j>i$ in $D$ such that $u(j)=-(w+1)$.  Choose the corresponding $j$ such that $u(k) \neq -(w+1) \forall k \in \{i, i+1, ..., j-1\}$.  Then every $i\in I$ will have a unique corresponding $j$ which together form $J$.  
+
+Because $u(j) < 0, j \notin I \forall j\in J$.  
+
+Using the fact that $F(n)\cdot F(-n - 1) = F(-1)$,
+$$
+\prod_{i}^D F(u(i)) = F(-1)^{C_D(``t")}
+$$
+Now consider the sequence $E$ of length $n$.  As before, assume, without loss of generality, that $P_1=``h"$ so $v(i)>0\forall i \in \{2, 3,..., n\}$.
+
+$u(1) = 0$ since $C_{D'D''...D^{(n)}}(``t") = C_{D'D''...D^{(n)}}(``h")$.  
+
+Then $u(1)=2$ since $P_1=``h"$ and $P_2=``h"$ or else this would be a dominating sequence of length 2.  So call the current index $i=2$ and value $v=1$.  
+
+We will begin the process of finding offset streaks.
+
+If $i=n$ terminate the process.
+
+Let $j$ be the value such that $u(j) = -(v+1)$ where $j>i$ and $u(k) \neq -(v+1) \forall k \in \{i, i+1, ..., j-1\}$, if it exists.
+
+If $j$ exists then the sequence $E_{i...j}$ is an offset streak $S$.  Because the boundary conditions and underlying functions are the same this offset streak has the same properties of the dominating streak.  $C_{E_{i...j}}(``t") = C_{E_{i...j}}(``h")$ and a there exists a one-to-one correspondence between negative and non-negative $u(k)$, where, when $u(k)=n>0$, there is an $l$ such that $u(l)=-(n+1)$.
+
+If $j \neq n$ then $E_{j+1} = ``h"$ since otherwise it would be part of an offset streak with an earlier $h$.  So $u(j+1) = v$.  Update the value of $i:=j+1$ and check if this is part of an offset streak.  
+
+Otherwise, if $j=n$, terminate the process.
+
+If $j$ does not exist then $E_{i+1}=h$ since, if $E_{i+1}=t$ this would form an offset streak of length 2.  So $u(i+1)=v+1$.  Update the value of $i := i+1$ and $v := v+1$ and continue the search for offset streaks.
+
+Once this process is finished we have created the sequence
+$$
+E=h(S_{1_1}S_{1_2}...S_{1_{n_1}})h(S_{2_1}S_{2_2}...S_{2_{n_2}})...hS_m...
+$$
+We can see that all elements $t$ are contained within an offset streak $S$.  Further, let $I$ be the set of values $i$ such that $E_i=``h"$ and $E_i$ is not contained within any sequence $S$.  The values of $u(i)$ for $i\in I = \{0, 1, 2 ...\}$ since we have shown that the $v$ increases by $1$ if there is an $h$ not captured by an offset streak.
+
+So, in $E$ with $C_{E}(``h") - C_{E}(``t") = d$, we see that 
+$$
+\prod_{i}^E F(u(i)) = F(-1)^{C_E(``t")}\cdot \prod_{i=1}^{d} F(i-1)
+$$
+Because $C_{D'D''...D^{(n)}}(``t") = C_{D'D''...D^{(n)}}(``h")$, we find that
+$$
+s = s_0 * F(-1)^c * \prod_{i=1}^{d} F(i-1)
+$$
+for $c = \min(h, t), d = \max(h, t) - c$.
+
+Because all orderings of a combination of $h$ heads and $t$ tails result in the same value, we find that the resulting value is independent of the ordering.
+
+### Calculating Via Our Findings
+
+Using this method we can dramatically speed up our calculations.
+
+Given our new betting fraction function $f$
+```python
+def f(p: float, n: int) -> float:
+  q = 1-p
+
+  frac = (p ** n - q ** n) / (p ** n + q ** n)
+  return (p - q) * frac
+```
+we can write a new function for $F(n)$
+```python
+def F(p: float, n: int) -> float:
+  return 1 + f(p, n)
+```
+We can now write a short function to implement our math for Equation $(1)$
+```python
+def get_new_stake(p: float, h: int, t: int) -> float:
+  c = min(h, t)
+  d = max(h, t) - c
+  result = F(p, -1) ** c
+
+  for i in range(d):
+    result *= F(p, i)
+  return result
+```
+and finally a short loop to calculate the expected value
+```python
+expected_value = 0
+for h in range(rounds + 1):
+  t = rounds - h
+  probability = get_prob_outcome(bias, h, t)
+  expected_value += get_new_stake(bias, h, t) * probability
+  c = min(h, t)
+  d = max(h, t) - c
+  print(get_new_stake(bias, h, t), c, d)
+
+print(expected_value)
+```
+This can now calculate the expected value for 1000 rounds in 0.2 seconds.
+
+It doesn't end there though.  Going just a bit farther, we can take advantage of the fact that the payoffs are symmetric across the number of heads and tails (the value after 60 heads and 40 tails is the same as 60 tails and 40 heads, despite the probabilities possibly being vastly different).  This is fairly intuitive seeing that $f(n)$ depends only on $d=|h-t|$.
+
+We can also rewrite our method to take better advantage of saved values for the multiplication sequence and we arrive, finally, and the memory efficient 
+```python
+def get_expected_value(bias: float, rounds: int) -> float:
+  expected_value = 0
+  f_neg1 = F(bias, -1)
+  pi_d = 1
+
+  # Prevent double-counting the center of the distribution
+  if rounds % 2 == 0:
+    probability = get_prob_outcome(bias, int(rounds/2), int(rounds/2))
+    expected_value -= f_neg1 ** int(rounds/2) * probability
+
+  for d in range(int(rounds % 2 != 0), rounds+1, 2):
+    c = int((rounds - d)/2)
+    probability = get_prob_outcome(bias, c, c+d) + get_prob_outcome(bias, c+d, c)
+    expected_value += log(f_neg1 ** c * pi_d) * probability
+
+    pi_d *= F(bias, d) * F(bias, d+1)
+    
+  return expected_value
+```
+which runs in $O(n)$, bringing our 1000 round calculation time down to less than 0.1 seconds.
+
+If we need to get the most probable value we can use the prior function and call
+```python
+expected_heads = round(BIAS * rounds)
+expected_tails = rounds - expected_heads
+get_new_stake(BIAS, expected_heads, expected_tails)
+```
+Very fast and a large improvement over prior methods.
+
+Continue to the [Conclusion](/blog/coin-betting-game-conclusion), which will provide some insight into simulating games and wrap up the series.
+
