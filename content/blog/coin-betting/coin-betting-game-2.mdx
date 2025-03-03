@@ -1,6 +1,6 @@
 ---
 title: 'Part 2 - Analysis and Simulations'
-publishedAt: '2025-02-24'
+publishedAt: '2025-03-03'
 summary: 'Simulating the situation in question'
 unlisted: True
 ---
@@ -162,7 +162,7 @@ Finally we take the obtain the expected value by taking a weighted average of al
 
 With another method to calculate that probability
 ```
-def get_prob_outcome(p: int, h: int, t: int) -> float:
+def get_prob_outcome(p: float, h: int, t: int) -> float:
   return p ** h * (1 - p) ** t * comb(h + t, h)
 ```
 we can find the overall expected value:

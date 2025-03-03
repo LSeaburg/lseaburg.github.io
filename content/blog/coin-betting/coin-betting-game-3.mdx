@@ -1,6 +1,6 @@
 ---
 title: 'Part 3 - Mathematical Restructuring and Optimizations'
-publishedAt: '2025-02-24'
+publishedAt: '2025-03-03'
 summary: 'Using a more direct mathematical approach'
 unlisted: True
 ---
@@ -17,7 +17,7 @@ In Part 2 we were able to simulate the coin flips in Python.  We simulated all p
 
 This works, but is very slow.  The code's runtime is approximately $O(n\cdot 2^n)$ and on my machine it takes nearly 8 seconds to simulate 20 rounds.  25 rounds takes about 5 minutes.  50 rounds would take well over 250 years to simulate.
 
-There are some nice tricks you can use to greatly speed up the computation.  Implementing a dynamic programming algorithm can cut the run time down to $O(n^3)$.  This is a huge improvement, making large calculations feasible.
+There are some neat tricks you can use to greatly speed up the computation.  Implementing a dynamic programming algorithm can cut the run time down to $O(n^3)$.  This is a huge improvement, making large calculations feasible.
 
 However, by using some clever math there is a way to cut the runtime down to $O(n)$.  You can simulate 1000 rounds in less than 100 milliseconds.
 
@@ -204,7 +204,7 @@ This can now calculate the expected value for 1000 rounds in 0.2 seconds.
 
 It doesn't end there though.  Going just a bit farther, we can take advantage of the fact that the payoffs are symmetric across the number of heads and tails (the value after 60 heads and 40 tails is the same as 60 tails and 40 heads, despite the probabilities possibly being vastly different).  This is fairly intuitive seeing that $f(n)$ depends only on $d=|h-t|$.
 
-We can also rewrite our method to take better advantage of saved values for the multiplication sequence and we arrive, finally, and the memory efficient 
+We can also rewrite our method to take better advantage of saved values for the multiplication sequence and we arrive, finally, at the memory efficient 
 ```python
 def get_expected_value(bias: float, rounds: int) -> float:
   expected_value = 0
@@ -225,7 +225,7 @@ def get_expected_value(bias: float, rounds: int) -> float:
     
   return expected_value
 ```
-which runs in $O(n)$, bringing our 1000 round calculation time down to less than 0.1 seconds.
+which runs in $O(n)$, bringing our 1000 round calculation time down to less than 100 milliseconds.
 
 If we need to get the most probable value we can use the prior function and call
 ```python
