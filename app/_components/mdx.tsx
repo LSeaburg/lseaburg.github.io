@@ -50,9 +50,9 @@ function CustomLink(props) {
 
 function Figure(props) {
   return ( 
-    <figure className="flex flex-col items-center my-4">
-      <RoundedImage src={props.src} alt={props.caption} />
-      <figcaption className="mt-2">{props.caption}</figcaption>
+    <figure className="flex flex-col items-center my-6">
+      <RoundedImage src={props.src} alt={props.alt || props.caption} />
+      <figcaption className="mt-2 w-4/5 text-center text-sm">{props.caption}</figcaption>
     </figure>
   )
 }
