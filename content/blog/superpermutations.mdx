@@ -1,0 +1,124 @@
+---
+title: 'So You Want to Find a New Superpermutation?'
+publishedAt: '2025-03-24'
+summary: "A deep dive into one of math's quirkiest problems"
+---
+## Introduction
+
+The quest for finding minimal superpermutations has a long and storied history.  While proposed in the early 1990s, the problem remained dormant for nearly 2 decades.  Then the problem was independently discussed on 4chan where progress was made and the lower bound was improved.
+
+The task is, for a given $n$, to find a minimal string that contains every permutation of $n$ elements as a substring.  For example, for $n=3$ the string must contain the sequences $123, 132, 213, 231, 312,$ and  $321$.  By ordering these cleverly you can make the end of one permutation overlap with the beginning of the next.  Here the superpermutation is $123121321$ - you can check to see that every permutation above appears somewhere in this sequence.
+
+Articles about this seem to pop up once every few months or so, discussing how anime fans performed some leading math research (despite that not being [strictly true](https://news.ycombinator.com/item?id=43290186)).  
+
+However, I've never seen much discussion about the actual math involved in the problem and where the problem stands today.  Some articles mention that the problem is still unsolved, but why?  What is makes it so difficult? What are people working on?  Did everyone just give up?
+
+## The Math
+
+I'll try to describe a high-level overview of the math behind this problem.  If you want a more in-depth look I cannot recommend [this resource](https://www.gregegan.net/SCIENCE/Superpermutations/Superpermutations.html#REF8) more highly.
+
+The problem can be thought about as a graph.  Let every permutation be a node and let there be directed edges with a weight equal to the amount of characters you have to append to the end of the first permutation to get to the second.  For example, $1234 \rightarrow 2341$ would have a weight of $1$, since adding a $1$ to the end of $1234$ creates the new permutation.  But $1234 \rightarrow 3412$ would have a weight of $2$ since you would have to add $12$ to the end.
+
+Since we want to find a string with all of the permutations as substrings, we just need to make sure that we visit every node in the graph.  Mathematically, we want to find the minimal Hamiltonian path of the graph.
+
+We can create a graph with all these nodes and populate all these edges.  The graph is symmetrical so we always start at node $123...n$ for simplicity.  We can define a greedy algorithm that says to examine all the edges from our current node, from lowest cost to highest.  Let's the first edge that takes us to a node that we haven't visited yet.
+
+<Figure src = "images/blog/superpermutations/greedy_5.png"
+        alt="A visualization for a greedy solution for n=5"
+        caption="A visualization for a greedy solution for n=5.  The permutations are nodes and only taken edges are shown - the total number of edges is far, far larger. Red edges have a weight of 1, green 2, blue 3, and orange 4."
+/>
+
+And it works!... for $n \leq 5$.  People thought it worked for $n=6$ but there was another solution that was found that had 1 fewer character.   And currently there's a solution for $n=7$ that gives a length 7 shorter than what this greedy algorithm would give.
+
+Essentially, by jumping around a bit and taking slightly longer paths at the beginning, you can avoid having to take those really long paths that you'll eventually be forced into when traveling along the greedy algorithm.  When $n=5$ these can come out to the same value, but for $n=6$ it starts to pay off.  These visualizations can help us understand what's going on.[^0]
+
+<Figure src = "images/blog/superpermutations/nongreedy_5.png"
+        alt="A visualization for a non-greedy solution for n=5"
+        caption="A visualization for a non-greedy but still optimal solution for n=5.  Notice how there are no edges of weight 4 and fewer of weight 3.  These are balanced by the increased number of weight 2 edges.  Also note how many of the red 1-cycle rings are 'broken' and need to be returned to."
+/>
+
+As stated, this is only the basics of the math involved here.  There are other methods to generate better solutions that require more intensive graph theory.  If curious, please read [this page](https://www.gregegan.net/SCIENCE/Superpermutations/Superpermutations.html#REF8) that I linked at the beginning of this section.
+
+## The History
+
+This problem has seen occasional bursts of activity.
+
+Cases for $n=1, 2, 3,$ and $4$ are small enough to brute force - you can test every possible combination to ensure that there is no valid solution of a smaller length.  These were known in 2011 by the 4chan investigators.
+
+But then the puzzle was mostly untouched until 2013 when Nathaniel Johnston [wrote](https://njohnston.ca/2013/04/the-minimal-superpermutation-problem/) about it.  The following year Ben Chaffin discovered a [clever algorithm](https://njohnston.ca/2014/08/all-minimal-superpermutations-on-five-symbols-have-been-found/) to exhaustively show that the minimal length for $n=5$ was indeed 153, the length given by the greedy algorithm.
+
+Inspired by recent events, Robin Houston would, later that month, show that $n=6$ bucks the trend - instead of the string of length 873 being minimal, as conjectured, a string of length 872 was provided.
+
+But after this flurry of activity the puzzle was again left dormant until 2018, when Robin Houston created this [GitHub repo](https://github.com/superpermutators/superperm) and this [Google Groups page](https://groups.google.com/g/superpermutators).
+
+Unfortunately, however, despite a lot of tooling improvements and some increased visibility, the only material improvement to come was the reduction of the $n=7$ case to $5907$, announced in the comments section of a YouTube video (explained [here](https://groups.google.com/g/superpermutators/c/KNhmzQy99ic)).  Using that approach as inspiration, Robin Houston and Greg Egan had a large breakthrough and worked together to lower the $n=7$ case to $5906$ later that month.
+
+At a very high level this 'kernel theory'[^1] provides a pattern for describing the early 'jumps' that you can take to try to save on those later higher-weight edges.  The 'kernel score' gives the length that the superpermutation would have **if it exists**.  Formalizing this theory was very useful for quickly improving the $n=7$ case.
+
+But this is the still the state of things today.
+
+## Stalled Progress
+
+The lack of material progress isn't for a lack of trying.  The problem is just *really* hard.
+
+These permutation graphs are symmetrical and seem like they should be ideal to analyze, but in practice they feel messy and chaotic.  Additionally, as the size of the graphs grow the search spaces become increasingly unpractical.  It is for this reason that, despite it being almost certain that the current best solutions for $n=8$ and $n=9$ are not optimal, there has been almost no effort put into determining better solutions.  The search would take a huge amount of compute.
+
+Based on Houston's kernel theory it's possible that there is a shorter length superpermutation for $n=7$.  Unlike some of his previous theories, though, which described how to construct a superpermutation of a given length, this one is probabilistic, describing a structure that a solution *might* exist for.  For finding the current solution of $5906$, 1.6 million kernels were generated and tested, 7 of which produced actual valid superpermutations[^2].  It's hard to predict how long it would take to generate and test all the kernels that could result in lengths of $5905$, and even if they were all generated and searched there might not be any results.
+
+Even the $n=6$ case hasn't seen a ton of progress.  Despite there being at least $42,288$ discovered unique superpermutations with length 872,[^3] it's still unknown whether 872 is actually the minimal length.  Though this also hasn't been for lack of effort.
+
+One of the most interesting parts of this entire saga came in 2019 with the Distributed Chaffin Method search.  Named after Ben Chaffin, the man who proved the result for $n=5$, the idea behind the Distributed Chaffin Method was to take the same algorithm and allow it to be run concurrently across many servers.  That way people could donate runtime to try to solve the case for $n=6$.  (This was created by Greg Egan.  As far as I am aware Ben Chaffin had no involvement in this except for creating the initial algorithm in 2014.)
+
+The search went on for over 4 years but was eventually [cut short](https://groups.google.com/g/superpermutators/c/7XJgsxK--tU).  After 100 million CPU hours the researchers realized that, at the current rate of computation, the answer wouldn't be reached until around, optimistically, 50 more years.[^4]
+
+There is a promising alternative for the $n=6$ case, though.  In 2021 Cole Fritsch [published](https://groups.google.com/g/superpermutators/c/0k_z5srgXbg) both a [paper](https://www.overleaf.com/project/601ed266db99ee3c36f71034) showing that the smallest possible superpermutation for $n=6$ is length $871$ and a [Python program](https://15015121149859966999.googlegroups.com/attach/42efb9be41623/SPSearch871Final2.py?part=0.1&view=1&vt=ANaJVrHK-ylgDrgQPtvgBBFjcTnRYIal1q9DuV5WdA8cnUE0Bj69aOyGaYFI5Oq8686s9UO6tcqaEvQwq3wWk0IMIUtGl312myCO_pIuONksYXz4t9Nt4QE) showing that a superpermutation of length $871$ is impossible.  In tandem, they effectively show that the minimal length superpermutation for $n=6$ is $872$, matching the current conjecture.  Cole Fritsch does, however, admit that the proof was not entirely complete and, in the paper, includes notes that certain sections need to be fixed.  It hasn't been updated since 2021.  
+
+I have not had the time to study either.  I'm sure there are some good ideas in the paper but, with an uneven interest in the problem, it has not been reviewed by many (any?) with formal mathematical training and has not been verified.
+
+Overall, this [list of current problems](https://groups.google.com/g/superpermutators/c/-c7ZoXcc05M) from 2019 is unfortunately still extremely relevant today.  There has been relatively little work of any kind since 2021.
+
+## A Surprise?
+
+After doing a bit of research into this topic I wanted to make a contribution, even if superficial.  I loved this history of amateur mathematicians periodically making progress on this silly problem and it sounded fun to be a part of.  And I thought I had identified the perfect opportunity.
+
+Greg Egan provided all of the code that he used to find kernels and generate superpermutations on GitHub, and seemingly no effort whatsoever had been put into improving the case for $n=8$.  **Any** solution with a non-zero kernel score would be a new record.  Some of these kernels have to be possible.
+
+And there was a backup possibility with $n=7$.  A solution with a better kernel score could result in a solution of length $5905$ or less.  All kernels of length 35 or less were exhaustively searched, but the only thing stopping anyone from doing more was compute.  
+
+I cloned the repository and started running it on my home server, an M4 Mac mini.  But unfortunately I quickly discovered that I completely misjudged the size of the problem.  
+
+You might believe that the time required to find a solution increased by somewhere in the realm of $n!$, the number of permutation with $n$ elements.  This appears to be how much the 'size of the problem' grows by, and is approximately the size that the solution grows by.  In terms of the graph, $n!$ is the number of nodes.  
+
+But the number of highly relevant edges (edges of weight 1, 2, and 3, which can't be reached through a combination of smaller edges) is then $6\cdot n!$ (and nothing says that an optimal solution for these higher values wouldn't include weight 4 edges - that would bring the total to $24 \cdot n!$ ( this is $w! \cdot n!$)).  
+
+When traversing through the graph to find a solution you can use techniques to prune some of these possibilities as you go.  Naturally, when trying to minimize the total weight, you will need to take as many 1 weight edges as possible.  But a standard Traveling Salesman approach would lead to a runtime of around $2^{n!}$ - a far cry from $n!$[^5].  If the case for $n=7$ took me an hour to find, an $n!$ increase in runtime could get me the solution in 8 hours.  A $2^{n!}$ increase in runtime would find the solution in $2^{35000}$ hours.  Probably should have done the math before I got the program running.
+
+I have optimistically left the program searching for solutions for the past 2 weeks, but, as expected, it hasn't turned up anything.
+
+## Future Work 
+
+Currently the state-of-the-art revolves around kernels.  This is likely where future research should be focused.  Any breakthroughs around shaping these structures could lead to significant progress on the lower bounds.
+
+Advances on the algorithmic/coding side could lead to new minimal superpermutation discoveries.  From my little bit of testing I think there is room for improvement both in terms of kernel selection and in determining if a given kernel can produce any valid solutions.[^6]  The runtimes of the searching programs could possibly be improved as well.
+
+I wish I had more time right now to review the code and dive more deeply into kernel construction.
+
+But for anyone reading, let this be a gateway with resources that you can look into if you want to get started.  And hopefully if I do find the time I can review this to jump back in.
+
+The search for minimal superpermutations is not over.  But whether the next one will be found in 1, 5, or 10 years... well, that could be up to you!
+
+
+
+[^0]: Full credit for the structure behind these visualizations goes to Greg Egan as published [here](https://www.gregegan.net/SCIENCE/Superpermutations/Superpermutations.html#REF8).  The ones on this page were generated by [this](https://github.com/LSeaburg/superpermutation-visualization) code that you can find on my GitHub.  The circles represent 1-, 2-, ..., $n$-cycles that are defined by the greedy algorithm (there are other ways to generate 2-cycles and higher order cycles in these graphs).  I wanted to explore this visualization method more because it preserves the 1-cycles so nicely but by $n=6$ it becomes too chaotic to make much of it.  Even the non-greedy $n=5$ case above shows the limits of this method.
+
+[^1]: While this idea was first put into practice by Bogdan Coanda, the person who discovered the 5907 length sequence, it was further refined and expanded on by Houston [here](https://groups.google.com/g/superpermutators/c/VRwU2OIuRhM/m/fofaUWqrBgAJ).
+
+[^2]: I repeated a portion of the same test that Egan initially performed to find the superpermutations of length 5906 on my M4 Mac mini (described [here](https://groups.google.com/g/superpermutators/c/Ya-H_wwt_HY/m/glEydjp_BQAJ) as Search 1).  The kernel generation took a few minutes.  Checking these kernels took about an hour or 2 to find a valid solution.  I had to cut this test short because of some system configuration issues, but I would expect that the exhaustive search to rediscover all 83 of the solutions he found would likely have taken around a day or 2 based on the rate it was processing.  I should also note that it is fairly trivial to parallelize this process - distributing the checking across 6 cores (a conservative limit on a 10-core system) would speed up this process by a factor of 6, and all 83 solutions could likely be generated within 12 hours.
+
+[^3]: My understanding is that this is the number of solutions of a [particular structure](https://groups.google.com/g/superpermutators/c/rsbCE0wI49Q/m/abUOefjlBgAJ), but that solutions of other structures exist for $n=6$.
+
+[^4]: For a detailed description of The Chaffin Method you can read [here](https://web.archive.org/web/20221205144508/https://github.com/superpermutators/superperm/wiki/Chaffin-method).  At a high level it checks to see if any solutions are possible for a set number of 'wasted' characters, wasted characters being ones that don't immediately create a new solution.  It is expected that the case for $n=6$ will have 147 wasted characters.  The network spent over 1.5 years trying to solve the $n=122$ case, and generally each additional case takes longer to solve.  25 more cases at an increasing growth rate would take well over 50 years.
+
+[^5]: I haven't even had the time to dive deeply into Egan's code to see how the search is implemented.  I don't have an estimate for it's runtime as written, but it's safe to say it's in between the two.  
+
+[^6]: For example, I have noticed that all palindromic kernels with an odd number of symbols are unviable and can be excluded very quickly - but is there a way to prove that no solution of this form can exist?  Can other large classes be excluded?  Searching would see significant speed-up if we can improve at ruling out large search spaces.
