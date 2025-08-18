@@ -1,0 +1,79 @@
+---
+title: 'Understanding Figgie: Part 1 - Background'
+summary: "What's the deal with Figgie anyway?"
+publishedAt: '2025-08-18'
+unlisted: False
+---
+# Understanding Figgie: Part 1 - Background
+
+## Who
+
+Jane Street Capital is a quantitative trading firm headquartered in New York City.
+
+This fact alone makes it an object of interest for many college students and recent graduates.  Quantitative firms tend to get an outsized interest among those considering finance due to their high compensation, and New York City is itself known for finance and high compensation.  It only makes sense that these firms will get a lot of attention.  Hudson River Trading, Two Sigma, and Citadel all attract a lot of applicants that want to get rich (Citadel is headquartered in Chicago but the point stands).
+
+But Jane Street seems to get even more attention than any of these others.  [This article](https://danluu.com/hiring-lemons/), dating a few years back, (somewhat exaggeratively) suggests that Jane Street is one of only two companies "that aren't highly dysfunctional" and would probably be a good place to work (the other being Dropbox).  But things get far crazier when it comes to Jane Street.
+
+People will go so far as to write articles like [this](https://web.archive.org/web/20221230205817/https://www.thediff.co/archive/jane-street/), dissecting every facet of their intern program, their tech stack, what they know (and don't know) about their trading strategies (and why they know and don't know those things).  It concludes by comparing the employees there to "chess champions" and "concert pianists".
+
+People don't write articles like this about other companies.  How did it get like this?[^1]
+
+Quantitative trading firms like these don't sell things to customers, and therefore don't need to advertise.  But Jane Street does advertise - to potential employees.  Employing the smartest and most driven people is how they make money, after all, and getting smarter people than their competitors is how they get their advantage.  In fact, the whole reason I started looking into their company again was because their ad popped up when I was doing Advent of Code - which caught my attention because they were a frequent sponsor of Stand Up Maths' YouTube videos.
+
+There is, what I like to call, a "Jane Street Recruiting Universe" (JSRU).  Some of it is what you would expect.  There's your typical booths at tech trade shows and events at Ivy Leagues.  They have a little YouTube channel with some promotional videos.  But there's so much more.
+
+There's the [monthly puzzles](https://www.janestreet.com/puzzles/), difficult logic and math challenges that have gathered many to compete to solve them as quickly as possible.[^2]  They have their own [podcast](https://signalsandthreads.com/) with employees discussing some of the interesting issues that they work on.  They have informative hour-long [tech talks](https://www.youtube.com/watch?v=g3qd4zpm1LA&list=PLCiAikFFaMJoWyXnJ2BWpse5HuiYibNYs) where they go in depth on engineering challenges.
+
+And then there's [Figgie](https://www.figgie.com).
+
+## What
+
+Figgie is a card game that Jane Street created in 2013.  The full rules are located [here](https://www.figgie.com/how-to-play.html).
+
+Figgie is a bit complicated.  The game was "designed to simulate open-outcry commodities trading".
+
+To try to explain it briefly, Figgie is 'like' poker in the sense that you have cards and chips.  Only the suit of the cards matter - the values are irrelevant.  Furthermore, the size of the deck is unique - 12 cards of 1 suit, 8 of another, 10 of the remaining two.  The suit that is the same color as the 12 cards suit is the goal suit.
+
+There are four minute rounds where you can negotiate to buy/sell cards from your opponents.  There is no notion of 'turns' - everyone can negotiate at all times.
+
+At the end of the round bonuses are given out based on who holds cards of the goal suit.
+
+## Why
+
+Aside from being associated with Jane Street there are a few things that make Figgie an interesting game to analyze.
+
+Probability and mathematics is built into the very structure of the game.  Not only is it required for optimal gameplay, it's required to understand the game at all - trying to determine the goal suit takes quite a bit of mathematics alone.  Ross Rheingans-Yoo, a former trader at Jane Street, and winner of the internal Jane Street Figgie championship, has an [excellent post](https://blog.rossry.net/figgie/) about it's virtues.
+
+It presents a lot of unique challenges by not being turn-based.  An AI engine for a traditional game could look like $F(s) \rightarrow m$, where you have a function that takes in a game state $s$ and outputs a move to make $m$.  Every turn you can call this function.  But this doesn't totally work when actions are real-time.  You need to adjust the framework a bit.
+
+There's not a lot of public research on it (that I was able to find, at least).  I referenced this (now-obsolete) [repo](https://github.com/CodingYuno/figgiebot) for the interface design and replicated the agent strategies described in [this paper](https://arxiv.org/pdf/2110.00879) to create a baseline for performance.  But that paper is fairly simplistic.  None of the strategies try to predict an opponents hand, for example.
+
+There are other repos out there.  But, while having a nice backend, [this project](https://github.com/CornellDataScience/FiggieBot/tree/main) only tries to implement one of the agents from the paper (I also had a difficult time trying to get this project running).  [Another](https://github.com/parmarsuraj99/figgie-python-rl/tree/main), in addition to a few models that effectively trade on noise, tries to use an LLM to drive the 'logic' for the agent players, which is certainly an interesting idea.[^3]
+
+Lastly, [this project](https://github.com/0xDub/figgie-auto) is quite interesting.  The structure is different, without a separate game server, but there are 7 different agent strategies, some of which are quite unique.
+
+But that's all that a quick Google search reveals.  No one has implemented any logic that considers other players' specific bids, trying to inference their strategies, trying to deduce their hands.  In my opinion, that's where the math starts to get interesting.  That's why I embarked on this project.
+
+There is one other interesting facet to this worth mentioning.  I said there's not a lot of public research on it - I do have some reason to believe that there is some private research on it.  Obviously Jane Street developed the AI for the bots you can play against on their site.  But recently, when I was playing against some bots on the official website a new player joined, called algoquant, demonstrating pretty clear bot behavior.  Looking at the all-time leaderboard you can also observe a player named Bot-2sigma.  I have no direct evidence to prove that these players were in fact bots and were in fact linked to [algoquant](https://algoquant.io) and [Two Sigma](https://www.twosigma.com), but it's certainly possible.
+
+Finally, one may ask why you need to study the game in this way, why not just play it.  Firstly, I cannot play it irl - none of my friends are into math nearly as much as I am.  Secondly, you can't really play against people on the servers, either.  I'm often quite shocked if I ever see more than 3 active rooms at the same time - people don't really play it that often.  And in my experience, if people do join your game, they might also just be bots.
+
+But lastly, it's also just an interesting challenge to try to formalize these game rules into mathematical concepts, to build up intuition about probabilities and events and try to distill them into equations.  I've long wanted to analyze a game in this way and make an AI that can play fairly optimally, and Figgie finally pushed me to do it.
+
+Ross Rheingans-Yoo, the Figgie Champion mentioned earlier, wrote a [beautiful obituary](https://blog.rossry.net/chisness/) for his collaborator Max Chriswick and their efforts of creating a learning platform for analyzing and solving games.  In some ways I hope that this project can be a nod to and an extension of that - a way to teach people new analytical skills and encourage people to explore new fields that they otherwise couldn't.
+
+## How
+
+Initially when I started this project I wanted to create a new trading strategy based on mathematical principles that tried to look at the price and volume of the traded cards to predict which cards the other players had in their hands.  Once you knew this you could predict what the goal suit was.  Then you could even try to create strategies to, early on, make false bids to throw opponents off, etc.  It seemed like an obvious place to start.
+
+The math behind these agents, and how their performance stacks up against the simpler models, will be explored in Part 3.
+
+But first, in Part 2, we will need to build up the intfrastructure that will allow all of this simulation to occur in the first place.
+
+
+
+[^1]: I am fully aware that this article, by its nature, also contributes to the mystique surrounding Jane Street.
+
+[^2]: I have had some recruiters and start-ups completely unaffiliated with Jane Street reach out to me on LinkedIn with interview offers just because I quickly solved the puzzles.  The page has become a resource that recruiters scape to identify talent.  
+
+[^3]: I'm all for creative applications of LLMs, and I may even try to replicate this down the line just to get a benchmark for it.  But between the latency and the energy usage of an LLM (as compared to, say, a model specifically trained on the rules of Figgie) the solution clearly isn't optimal.
