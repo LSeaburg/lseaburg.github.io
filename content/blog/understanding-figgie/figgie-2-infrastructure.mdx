@@ -1,0 +1,98 @@
+---
+title: 'Understanding Figgie: Part 2 - Infrastructure'
+summary: 'Creating a simulation framework.'
+publishedAt: '2025-08-25'
+unlisted: False
+---
+# Understanding Figgie: Part 2 - Infrastructure
+
+This is Part 2 of an ongoing series looking at the card game Figgie.  For some background on the game you can read [Part 1](/blog/figgie-1-background).  All of the code is available on my [GitHub](https://github.com/LSeaburg/FiggieServer).
+
+If you have an incredible model but you aren't able to run it, the model has effectively no value.
+
+In order to run a game of Figgie you need a game engine.  In order to track performance you need a database.  In order to view metrics you need a dashboard.
+
+Thus, in order to meaningfully experiment with new strategies for playing Figgie you need to build out a framework for testing, simulating, and tracking the performance of said models.  This sounds obvious in hindsight but is something I wasn't thinking about in the beginning.
+
+<Figure src = "images/blog/figgie/system-diagram.png"
+        caption="A system diagram showing all pieces of the FiggieServer repo."
+/>
+
+## Agents
+
+I had a few major goals for what I wanted this framework to look like.  Inspired by [FiggieBot](https://github.com/CodingYuno/figgiebot), I wanted the different model files to be self-contained and event-based.  When implementing agents, all a developer should have to care about is the core mathematical foundation and logic of that agent.  It needs to be able to respond to events that are happening in the game and take actions in said game.  It should not have to worry about formatting API calls and processing JSON that the API is throwing back.
+
+Naturally, then, I needed an interface that would act as an in-between for the agents and the server.  This could also keep the agents portable.  If I came up with a better server design, for example, changing just this one file would update all the agents for the new server so long all of the event triggers and action handlers were supported.  And this is a good assumption.
+
+The actions that are supported is fairly simple - buy, sell, cancel.  Calling these will place buy orders, place sell orders, or cancel orders that have been placed.  With the possible exception of cancelling, these actions are absolutely required to play the game.  
+
+The event triggers don't get much more complex.  `on_bid` triggers when someone places a bid; `on_offer` when someone places a new offer.  `on_cancel` triggers when someone cancels one of their orders.  `on_transaction` gets called when cards change hands.  Finally, there's `on_start` and `on_tick` - the former gets called at the beginning of the round, the latter gets called periodically throughout the round (configurable - in my testing I set it to around 250-1000 times per round).
+
+When implementing the few agents that I have, I've noticed that I structure my logic as
+- `on_start` to perform some initialization
+- `on_bid`, `on_offer`, `on_transaction`, `on_cancel` to update state
+- `on_tick` to act on state and trigger actions
+
+This breakdown has worked very well for compartmentalizing logic.
+
+There are pieces that could be common to the interface - the market, for example. However, I feel this makes the agents less portable, as the requirements for the interface grow.  By separating logic for each agent it's more clear what pieces of information each agent actually ingests to come to its decisions.  
+
+## Game Server
+
+For the server I decided to use Flask.  My idea of making a bot that can play a game on a website always involved some process doing repeated scans of the HTML to read update values in the program's state.  That is more or less what my interface does.  There's no HTML, but the interface class reaches out to a Flask endpoint to get a JSON packet, and then detects if anything changes.
+
+In hindsight I think this is the worst design decision I made.  The server only updates state when it gets pinged, so if people join a game but never ping the server, then the game will never end.  I added some logic to mitigate the effect of this happening, but it was my first time designing a web server like this, and it shows.  It probably would have been better to use something like FastAPI and WebSockets, as this would also have the added benefit of cutting down on the amount of traffic bombing the server.  
+
+Another tricky component of designing the game server was handling the joining process.  Games should have either 4 or 5 players.  But how do you start games once people join?  If you have 4 players queued, should one of the players have to send a "start_game" request?  Does this have to be a specific player in the room?  Do you need to have multiple rooms on the server?
+
+This was supposed to be a Figgie logic project, not a web-server project, so I just made it so that, when the correct number of people queued in the server the game would automatically start.  But this makes it impossible to have 5 players in a room.  So you just run two servers, one for 4 player games and one for 5 player games, and put them on different ports.  It's a bit jank, but it works.
+
+One of the server decision I am proud of is the configurable round time.  A standard game of Figgie lasts 4 minutes, but if you shorten the game by the same amount that you speed up the agents tick rate then the agents will have the same "experience" of the game.  Because of this, there's a concept of a "real polling rate" - the actual amount of time in between pings - and the "normalized polling rate" - what the equivalent rate would be if you were playing a 4 minute game.  This allows you to simulate games and collect data much faster than you would otherwise be able to.
+
+Overall, the Flask solution works "well enough".  Even though it's not perfect I've never encountered a problem with it.
+
+## Database
+
+While I initially toyed with the idea of using SQLite, I decided to use a postgrSQL database for all of the logging.  I think this was the right call.
+
+Every action in every game is logged to the database.  All bids, offers, transactions, everything.  While currently there are no pipelines in place to use it, I think that having this data will open other opportunities for analysis.  It would techncially be possible to 'replay' a game by jumping into the middle, for example.  Likewise, any visualization that could take place during a game could also then work using the recorded activity after the fact.  
+
+For every round, starting and ending hands and balances are captured in a results table, allowing you to easily query net profit and other key metrics.  
+
+## Dashboard
+
+<Figure src = "images/blog/figgie/website-metrics.png"
+        caption="A screenshot from the dashboard showing agent performance across many games."
+/>
+
+Sticking with python, I chose Dash for my dashboard.
+
+One of the most challenging aspects of the entire project was figuring out how to compare agent performance.  While it might seem simple at first glance getting a standard baseline can be very challenging.  
+
+If I play A with aggression=0.8 against B, and A wins, and then play A with aggression=0.2 against C, and A loses, what does that tell me?  Does A perform better with a higher aggression value?  Or is C better at defeating A than B is?
+
+While I thought about trying to introduce ELO rankings, the V1 Figgie Server has the concept of "Experiments".  Each experiment is a set of either 4 or 5 agents that will repeatedly play against each other (they need to play many times to diminish the randomness of having different starting hands and probabilistic actions).  That way all agent comparisons will be controlled and like-for-like.
+
+But the dashboard isn't just a place to view results - the dashboard also allows you to configure and run these experiments.
+
+All of these experiment configurations are stored in the database.
+
+The dispatcher controls the lifecycles of agents.  It will bring them up, have them join the server, and kill the processes when the game ends.  The dashboard and dispatcher work together to bring up agents from selected experiments so that games can be easily simulated.  Afterwards, the dashboard will automatically update with the new results.
+
+Some of the styles and colors used in the dashboard are a nod to the official site.
+
+# Sharing Software
+
+This is not an amazing command line tool that will get tens of thousands of users, but it is the first time I'm sharing a fairly fleshed-out project that other people could *potentially* be interested in.  But this whole process has made me reflect on the value of open-source software.
+
+LLMs have made code incredibly cheap.  Code by itself is now practically worthless.
+
+But debugged code that is easy to use, and that has earned your trust, is still extremely valuable.  That was a large reason for why I containerized everything in this project.  One docker compose command is all it takes to bring everything up.
+
+And that is also why I put effort into making sure that the UI was easy to use and was able to handle errors.  Because having good tooling is so valuable.  Using tools that catch mistakes for you, or prevent them in the first place, can lower the cognitive load so that you can focus on the aspects of the project that need your attention.  
+
+For anyone that is interested in exploring Figgie and making a bot, this project tries to greatly lower that barrier for entry.  All you need to focus on is how to handle events and decide when to take action.  All the underlying infrastructure is here to support you.
+
+I'm not sure if this project will get many (or any) users, but I tried to make it as easy as possible to [get started](https://github.com/LSeaburg/FiggieServer).  If nothing else it's been a fun experience trying to create something new.  It's also been very educational and has made me reflect on the nature of the software that I use everyday.
+
+Part 3 in this series will be focused on the math of actually playing Figgie.  Stay tuned!
