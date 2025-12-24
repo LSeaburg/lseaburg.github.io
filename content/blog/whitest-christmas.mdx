@@ -1,0 +1,105 @@
+---
+title: 'White Christmas Rabbit Hole'
+publishedAt: '2025-12-24'
+summary: "Creating the Whitest Christmas imaginable"
+---
+## How Many 'White Christmas's are there?
+
+<Figure src = "images/blog/whitest-christmas/whitest-christmas.png"
+/>
+
+[Apple Music Playlist](https://music.apple.com/us/playlist/the-whitest-christmas/pl.u-DdANNZoua4bZW08) 
+
+[Spotify Playlist](https://open.spotify.com/playlist/7El0r7q8eOINiV9QfqHApo)
+
+Last week I took a flight to go back home for the holidays and saw a Sabrina Carpenter Christmas song pop up in my queue.  That prompted me to checkout *Fruitcake*, her Christmas EP, upon which I saw 'white xmas'.  
+
+*This is a pretty good cover of 'White Christmas'*, I thought, getting onto the plane.  But then I started thinking - what makes a cover of 'White Christmas' good?  'White Christmas' must be one of the most covered songs of all time, what could meaningfully set them apart?  Could I build up a baseline of what a typical 'White Christmas' cover entailed?
+
+'White Christmas' was everywhere I looked.  It's fairly well-known that 'White Christmas' is the [best selling single of all time](https://en.wikipedia.org/wiki/List_of_best-selling_singles).  Was this also the most-covered song of all time?  
+
+## The Beginning
+
+Once we took off I saw that I had to pay for internet, but, through some promotion of some sort, Apple Music access during the flight was unlimited and free.  Was this a sign?
+
+I didn't have anything I particularly wanted to watch so I opened up Music.  You can't simply search for "White Christmas" and get all of them - the search results only show so many results, and it's difficult to filter.  But between that and Christmas playlists and trekking through every Christmas album I could find, I managed to pull together 80 different 'White Christmas' tracks on the flight home!
+
+## The Progression
+
+Of course I wanted to get to 100.  
+
+I searched Google to see if there were any articles people wrote about their favorite covers of 'White Christmas,' to see if there were any I could add.  And I did hit 100 different versions of 'White Christmas'.
+
+But it was hard to stop there.  I was still getting more and more.  How many more were there?
+
+I stumbled across the holy grail of 'White Christmas' covers - the holy grail of all Christmas covers.
+
+## A New Chapter
+
+[SecondHandSongs](https://secondhandsongs.com) is a crowdsourced database with the aim to identify every song cover, ever.  They had identified over [2600 versions of 'White Christmas'](https://secondhandsongs.com/work/2981/versions).
+
+Incidentally, this makes 'White Christmas' the fourth [most covered song of all time](https://secondhandsongs.com/statistics), firmly behind 'Stille Nacht (Silent Night)' and right alongside 'Summertime',[^1] 'Minuit, chrétiens (O, Holy Night)' and 'We Wish You a Merry Christmas'. [^2]
+
+I knew what I had to do.
+
+The database crowdsources not only a list of covers, but links to the covers on YouTube, Spotify, Apple Music, and elsewhere.  Unfortunately for me, the Apple Music links were a bit lacking compared to the Spotify ones.  If I wanted my Apple Music playlist to be definitive, I had to add some links.  It was a decent amount of manual labor, and I probably added 200 or so to shore that up.
+
+## Is This a Tech Blog?
+
+From there, extracting all of the links was quite trivial.  I got rate-limit banned a few times, but I paced out my requests and got all the Apple Music (and Spotify) links into text files of my own.
+
+Trying to make the Apple Music playlist turned this project into a White Christmas nightmare.  The API is only available to people in the paid Developer program so I tried to automate it though the Music app with AppleScript.  After fighting for a bit I finally got the pattern working - load the song, tab twice + enter to play it, move mouse to the playback window and control-click.  From there, you can just use the arrow keys to navigate and add the song to the playlist.  It would take ~10 seconds per song or so to account for the loading and playback lag in the worst-case, but it would work.
+
+But then I discovered that the menu changes depending on the song!  Sometimes the Download button is the second one down, sometimes there is no Download button.  And I had no idea what was triggering this.
+
+So finally I caved and paid the \$99 for an Apple Developer account, and after setting up my tokens, the entire playlist was created in a few seconds.  Paying \$100 for the privilege of making my own playlist in the walled garden.
+
+Spotify's API is completely free to use.  I don't even have a paid Spotify account!  This is honestly the best case for switching that I've come across.
+
+In all, on SecondHandSongs, Apple Music has more tracks linked than Spotify (thanks to me), with about 960 vs 900.  But so many of the Apple Music songs have evidently been taken off the platform, reducing the number of tracks in the [Apple Music Playlist](https://music.apple.com/us/playlist/the-whitest-christmas/pl.u-DdANNZoua4bZW08) to 888.  The [Spotify Playlist](https://open.spotify.com/playlist/7El0r7q8eOINiV9QfqHApo), meanwhile, has 905.
+
+## One Last Thing
+
+The Spotify API has one more massive advantage - the ability to query track and artist popularity (Apple doesn't give you that, even after you pay \$100).
+
+Using this, you can find some of the more significant 'White Christmas's that are out there.
+
+I think there's 3 interesting categories: Popular Artists with Popular Tracks, non-Popular artists with Popular Tracks, and lastly, Popular Artists with non-Popular tracks (this person has a white Christmas cover?).
+
+This data comes straight from Spotify, which has a large recency bias when calculating popularity.  While this isn't ideal, it is still a good source of data that will give us a few insights.
+
+### Popular Tracks, Popular Artists
+
+The most popular version of 'White Christmas' is Bing Crosby's 1947 version.  Another version that is hot this Christmas season is Sabrina Carpenter's, the very song that kicked off this saga.  I guess it is a good cover!
+
+The other three artists that make it in this quadrant are Elvis Presley, Dean Martin, and Pentatonix.
+
+### Popular Tracks, non-Popular Artists
+
+These are what I could consider the 'White Christmas' staples - artists you don't really know, but you probably know their 'White Christmas'.
+
+This is led by The Drifters, and includes George Ezra, Meghan Trainor, Randy Travis, Maddie & Tae, Gracie Schram, and Scotty McCreery.
+
+### non-Popular Tracks, Popular Artists
+
+People you know who have a 'White Christmas' you probably don't.
+
+This category has, somewhat surprisingly, Frank Sinatra and Michael Bublé, whose renditions must not be as well-streamed this year.  Kelly Clarkson and Andy Williams are also a bit surprising to me.  Versions you might not have heard, though, are covers by Elton John (with Rosie O'Donnell), Taylor Swift, Katy Perry, Lady Gaga, and OneRepublic.
+
+## Limitations
+
+As far as the data analysis portion goes, I think artist popularity might swing wildly in the holiday season, especially for those artists that are known for their 'White Christmas'.  I need to obtain a baseline for a different time of year that I can compare against.
+
+And as for the playlists, there are always more versions of 'White Christmas' out there, left to discover.  There are a lot of tracks that are missing links to streaming services, and I even inadvertently found a few that are not listed on SecondHandSongs that I have not reported yet.
+
+But for now these playlists contain more renditions of this tune that I ever thought possible.
+
+Wishing you a white Christmas.
+
+
+
+
+[^1]: Really, 'Summertime'?  No one even knows that song.  How has that become the most covered non-Christmas song of all time (by a significant margin, no less)?
+
+[^2]: Aside from 'Silent Night', which is clearly #1, all other songs listed there are probably within a margin of error, especially when you reduce the scope to non-instrumental, English-language covers.
+
